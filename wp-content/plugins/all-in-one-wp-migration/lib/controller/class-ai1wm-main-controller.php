@@ -113,6 +113,9 @@ class Ai1wm_Main_Controller {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_reset_scripts_and_styles' ), 5 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_updater_scripts_and_styles' ), 5 );
 
+		// Render the bulk delete button below the backups list
+		add_action( 'ai1wm_backups_left_end', 'Ai1wm_Backups_Controller::bulk_delete_button' );
+
 		// Handle export/import exceptions (errors)
 		add_action( 'ai1wm_status_export_error', array( $this, 'handle_error_cleanup' ), 5, 2 );
 		add_action( 'ai1wm_status_import_error', array( $this, 'handle_error_cleanup' ), 5, 2 );
@@ -129,6 +132,9 @@ class Ai1wm_Main_Controller {
 
 		// Add custom schedules
 		add_filter( 'cron_schedules', array( $this, 'add_cron_schedules' ), 9999 );
+
+		// Map the full-site import meta capability
+		add_filter( 'map_meta_cap', array( $this, 'add_map_meta_cap' ), 9999, 4 );
 	}
 
 	/**
@@ -719,7 +725,7 @@ class Ai1wm_Main_Controller {
 			'ai1wm_export',
 			__( 'Import', 'all-in-one-wp-migration' ),
 			__( 'Import', 'all-in-one-wp-migration' ),
-			'import',
+			'ai1wm_import_site',
 			'ai1wm_import',
 			'Ai1wm_Import_Controller::index'
 		);
@@ -728,7 +734,7 @@ class Ai1wm_Main_Controller {
 			'ai1wm_export',
 			__( 'Backups', 'all-in-one-wp-migration' ),
 			__( 'Backups', 'all-in-one-wp-migration' ) . ' ' . Ai1wm_Template::get_content( 'main/backups', array( 'count' => Ai1wm_Backups::count_files() ) ),
-			'import',
+			'ai1wm_import_site',
 			'ai1wm_backups',
 			'Ai1wm_Backups_Controller::index'
 		);
@@ -893,6 +899,9 @@ class Ai1wm_Main_Controller {
 
 				// Backups
 				'want_to_delete_this_file'            => __( 'Are you sure you want to delete this backup?', 'all-in-one-wp-migration' ),
+				'want_to_delete_selected_singular'    => __( 'Are you sure you want to delete %d selected backup?', 'all-in-one-wp-migration' ),
+				'want_to_delete_selected_plural'      => __( 'Are you sure you want to delete %d selected backups?', 'all-in-one-wp-migration' ),
+				'delete_selected'                     => __( 'Delete (%d selected)', 'all-in-one-wp-migration' ),
 				'unlimited'                           => __( 'Backup restore requires the Unlimited Extension. <a href="https://servmask.com/products/unlimited-extension" target="_blank">Get it here</a>', 'all-in-one-wp-migration' ),
 				'restore_from_file'                   => sprintf(
 					/* translators: 1: Link to Unlimited Extension */
@@ -1379,6 +1388,23 @@ class Ai1wm_Main_Controller {
 		);
 
 		return $schedules;
+	}
+
+	/**
+	 * Add map meta capabilities
+	 *
+	 * @param  array<int, string> $caps    Primitive capabilities required of the user
+	 * @param  string             $cap     Capability being checked
+	 * @param  int                $user_id The user ID
+	 * @param  array<int, mixed>  $args    Adds context to the capability check, typically starting with an object ID
+	 * @return array<int, string>
+	 */
+	public function add_map_meta_cap( $caps, $cap, $user_id, $args ) {
+		if ( $cap === 'ai1wm_import_site' ) {
+			return array( 'import', 'install_plugins', 'install_themes' );
+		}
+
+		return $caps;
 	}
 
 	/**

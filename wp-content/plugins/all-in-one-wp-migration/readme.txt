@@ -4,7 +4,7 @@ Tags: backup, clone, migrate, move-wordpress, export-import
 Requires at least: 3.3
 Tested up to: 7.0
 Requires PHP: 5.3
-Stable tag: 7.106
+Stable tag: 7.107
 License: GPLv3 or later
 
 Trusted by 60M+ sites: The gold standard for WordPress migration and backup. Migrate, backup, and restore your WordPress site with one click.
@@ -164,6 +164,16 @@ All-in-One WP Migration is in full compliance with General Data Protection Regul
 See our [GDPR Compliant Privacy Policy here](https://www.iubenda.com/privacy-policy/946881).
 
 == Changelog ==
+= 7.107 =
+**Added**
+
+* Bulk select and delete for backups
+
+**Fixed**
+
+* REST export and import now restricted to network super-admins on multisite
+* Site import now restricted to users with stronger capabilities
+
 = 7.106 =
 **Added**
 

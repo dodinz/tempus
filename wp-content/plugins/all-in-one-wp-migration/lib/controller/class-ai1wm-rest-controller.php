@@ -271,15 +271,22 @@ class Ai1wm_Rest_Controller {
 	/**
 	 * @return bool
 	 */
+	protected static function can_run_on_network() {
+		return ! is_multisite() || is_super_admin();
+	}
+
+	/**
+	 * @return bool
+	 */
 	public static function can_export() {
-		return current_user_can( 'export' );
+		return self::can_run_on_network() && current_user_can( 'export' );
 	}
 
 	/**
 	 * @return bool
 	 */
 	public static function can_import() {
-		return current_user_can( 'import' );
+		return current_user_can( 'ai1wm_import_site' );
 	}
 
 	/**
@@ -415,7 +422,7 @@ class Ai1wm_Rest_Controller {
 	public static function capabilities( $request ) {
 		$capabilities = array(
 			'export'                => current_user_can( 'export' ),
-			'import'                => current_user_can( 'import' ),
+			'import'                => current_user_can( 'ai1wm_import_site' ),
 			'max_upload_size'       => wp_max_upload_size(),
 			'max_upload_size_human' => size_format( wp_max_upload_size() ),
 			'wordpress_version'     => get_bloginfo( 'version' ),
