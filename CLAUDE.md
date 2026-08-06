@@ -3,24 +3,42 @@
 ## What this is
 A premium WooCommerce site for **Tempus** — a whisky, cigar & vinyl bar/store
 (Manila). Luxury brand: warm-dark + gold aesthetic, slow/deliberate browsing.
-Custom classic theme lives in `wp-content/themes/tempus/`.
+Repackaged as **plugin + Kadence child theme**:
+- `wp-content/plugins/tempus-core/` — site functionality (theme-independent)
+- `wp-content/themes/tempus-kadence/` — presentation (child of Kadence)
+- `wp-content/themes/tempus/` — LEGACY standalone theme; kept only until the
+  switchover is verified, then delete (`wp theme delete tempus`). While it is
+  the active theme, tempus-core stands down to avoid function redeclares.
 
 ## Stack
-- WordPress (classic theme, not block/FSE), PHP 8.0+
+- WordPress classic theme: **Kadence** parent (install via `wp theme install
+  kadence`) + `tempus-kadence` child. Not block/FSE. PHP 8.0+
 - WooCommerce for catalog/cart/checkout
 - Advanced Custom Fields (PRO — repeaters used) for editable homepage zones
 - WooCommerce Product Bundles for "Ritual" bundles
 - Plugins expected: WP Mail SMTP, a form plugin (WPForms/CF7), an age-verification plugin
 
-## Theme architecture
+## Architecture
+Plugin `tempus-core` (functionality; survives theme switches):
+- `includes/taxonomy.php` — product categories/tags seeded in code on plugin
+  activation + theme switch.
+- `includes/acf-fields.php` — homepage field group (registered in PHP, not the DB).
+- `includes/woocommerce.php` — product badges, shop layout, age-gate hook stub.
+- `includes/helpers.php` — `tempus_field()` ACF-with-fallback helper.
+
+Child theme `tempus-kadence` (presentation):
 - `assets/css/tokens.css` — SINGLE SOURCE OF TRUTH for color/type/spacing.
   Never hardcode brand hex or px elsewhere; reference the CSS variables.
-- `assets/css/main.css` — layout + components (class prefix `tz-`).
+- `assets/css/kadence-bridge.css` — maps Kadence Global Styles
+  (`--global-palette1..9`, fonts, content width) FROM the tokens and restyles
+  Kadence chrome (header/footer/buttons/Woo). Loads after Kadence's styles.
+- `assets/css/main.css` — tz- components only (chrome comes from Kadence).
 - `template-parts/home/*` — homepage sections (hero, pursuits, featured-bottles, rituals, membership).
-- `inc/taxonomy.php` — product categories/tags seeded in code on theme activation.
-- `inc/acf-fields.php` — homepage field group (registered in PHP, not the DB).
-- `inc/woocommerce.php` — product badges, shop layout, age-gate hook stub.
 - `front-page.php` assembles the homepage from the partials.
+- `functions.php` — enqueues, one-time Kadence palette seeding (mirror of
+  tokens; re-seed via `wp option delete tempus_kadence_palette_seeded` +
+  re-activate), plugin-missing safety shim.
+- Header/footer/nav are built with Kadence's Customizer builders, not templates.
 
 ## Conventions
 - CSS classes are BEM-ish under the `tz-` prefix.
@@ -30,7 +48,7 @@ Custom classic theme lives in `wp-content/themes/tempus/`.
 - Keep design tokens in sync with the approved mockup — do not invent colors.
 
 ## Common commands (WP-CLI)
-- Reactivate theme (re-seeds taxonomy): `wp theme activate tempus`
+- Reactivate theme (re-seeds taxonomy): `wp theme activate tempus-kadence`
 - List product cats: `wp term list product_cat --fields=name,slug,parent`
 - Create a product: `wp wc product create --name="..." --type=simple --user=admin`
 - Flush rewrite/permalinks after template changes: `wp rewrite flush`

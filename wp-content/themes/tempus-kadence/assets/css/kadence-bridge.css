@@ -1,0 +1,191 @@
+/* ============================================================
+   TEMPUS ↔ KADENCE BRIDGE
+   Maps Kadence's Global Style CSS variables onto the Tempus design
+   tokens (tokens.css = single source of truth), then restyles the
+   Kadence-supplied chrome (header, footer, buttons, WooCommerce)
+   to the warm-dark + gold look.
+
+   Loads AFTER Kadence's own styles (see functions.php, priority 20)
+   so these :root declarations win the cascade over the palette
+   Kadence prints inline — the front-end brand colors therefore never
+   depend on Customizer state.
+   ============================================================ */
+
+/* ---- Kadence Global Styles ← Tempus tokens ----
+   Slot semantics follow Kadence's convention:
+   1 accent · 2 accent alt/hover · 3 strongest text · 4 body text
+   5 muted text · 6 subtle borders · 7 card bg · 8 alt bg · 9 page bg.
+   (gold-aged / gold-warm have no palette slot — token-only shades.) */
+:root {
+  --global-palette1: var(--gold-tempus);
+  --global-palette2: var(--gold-deep);
+  --global-palette3: var(--white);
+  --global-palette4: var(--on-surface-variant);
+  --global-palette5: var(--ink-faint);
+  --global-palette6: var(--outline-variant);
+  --global-palette7: var(--espresso);
+  --global-palette8: var(--surface-container-low);
+  --global-palette9: var(--near-black);
+
+  /* Typography + layout */
+  --global-heading-font-family: var(--font-display);
+  --global-body-font-family: var(--font-ui);
+  --global-content-width: var(--container-max);
+}
+
+/* ---- Base (kept out of main.css so components stay chrome-free) ---- */
+body {
+  background: var(--bg-page);
+  font-family: var(--font-ui);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--text-primary);
+}
+a { color: var(--gold-tempus); text-decoration: none; transition: color var(--dur-fast) var(--ease-out); }
+a:hover { color: var(--gold-deep); }
+
+/* Kadence content wrappers should never re-introduce a light ground. */
+body.content-style-unboxed .site,
+.content-bg, body.content-style-boxed .site .content-bg,
+.site { background: var(--bg-page); }
+
+/* ============================================================
+   HEADER (Kadence header builder)
+   Baseline dark chrome; fine-tune rows/items in the Customizer —
+   Appearance → Customize → Header.
+   ============================================================ */
+#masthead {
+  background: var(--scrim-top);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--outline-variant);
+}
+#masthead .site-header-row-container-inner,
+#masthead .site-header-row { background: transparent; }
+
+#masthead .site-branding .site-title,
+#masthead .site-branding .site-title a {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+#masthead .site-branding .site-description { color: var(--on-surface-variant); }
+
+.main-navigation .primary-menu-container > ul > li > a,
+.mobile-navigation ul li a {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.main-navigation .primary-menu-container > ul > li > a:hover,
+.main-navigation .primary-menu-container > ul > li.current-menu-item > a {
+  color: var(--gold-tempus);
+}
+
+/* Dropdowns / mega-sub-menus */
+.main-navigation .primary-menu-container ul ul.sub-menu,
+.main-navigation .primary-menu-container ul ul.submenu {
+  background: var(--espresso);
+  border: 1px solid var(--outline-variant);
+  border-top: 2px solid var(--gold-tempus);
+  box-shadow: var(--glow-warm);
+}
+.main-navigation .primary-menu-container ul ul li a { color: var(--on-surface-variant); }
+.main-navigation .primary-menu-container ul ul li a:hover { color: var(--gold-tempus); background: transparent; }
+
+/* Mobile drawer + toggle */
+#mobile-drawer .drawer-inner, .popup-drawer .drawer-inner { background: var(--surface-container-lowest); }
+.menu-toggle-open, .search-toggle-open { color: var(--white); }
+
+/* ============================================================
+   FOOTER (Kadence footer builder)
+   ============================================================ */
+.site-footer {
+  background: var(--surface-container-lowest);
+  border-top: 1px solid var(--outline-variant);
+  color: var(--on-surface-variant);
+}
+.site-footer .site-footer-row-container-inner,
+.site-footer .site-footer-row { background: transparent; }
+.site-footer .widget-title, .site-footer .widget-area .widget-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold-aged);
+}
+.site-footer a { color: var(--on-surface-variant); }
+.site-footer a:hover { color: var(--gold-tempus); }
+
+/* ============================================================
+   BUTTONS — Kadence / block / WooCommerce buttons take the
+   tz-btn--primary look so every CTA matches the mockup.
+   ============================================================ */
+.button, .wp-block-button__link, .wp-element-button,
+input[type="submit"], button[type="submit"],
+.woocommerce a.button, .woocommerce button.button,
+.woocommerce .single_add_to_cart_button {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  border: var(--border-width-cta) solid transparent;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.button:hover, .wp-block-button__link:hover, .wp-element-button:hover,
+input[type="submit"]:hover, button[type="submit"]:hover,
+.woocommerce a.button:hover, .woocommerce button.button:hover,
+.woocommerce .single_add_to_cart_button:hover {
+  background: var(--accent-hover);
+  color: var(--on-accent);
+}
+
+/* ============================================================
+   WOOCOMMERCE surfaces
+   ============================================================ */
+.woocommerce span.onsale {
+  background: rgba(200, 146, 42, .15);
+  color: var(--gold-tempus);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.woocommerce .price, .woocommerce .price .amount {
+  font-family: var(--font-display);
+  color: var(--gold-tempus);
+}
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--white);
+}
+
+/* Form fields (checkout, account, search) */
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="password"], input[type="search"], textarea, select {
+  background: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius);
+  color: var(--white);
+  font-family: var(--font-ui);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--focus-ring);
+}
+::placeholder { color: var(--ink-faint); }

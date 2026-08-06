@@ -1,0 +1,23 @@
+/*
+Theme Name: Tempus — Kadence Child
+Theme URI: https://tempusrituals.com
+Template: kadence
+Author: Dindo Ballecer
+Author URI: https://tempusrituals.com
+Description: Kadence child theme for Tempus — Whisky, Cigar & Vinyl. A chiaroscuro of warm dark and gold, built for slow, deliberate browsing. Design tokens live in assets/css/tokens.css and are mapped onto Kadence's Global Styles via assets/css/kadence-bridge.css. Site functionality (taxonomy, ACF fields, badges) lives in the Tempus Core plugin.
+Version: 1.0.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: tempus-kadence
+WC requires at least: 8.0
+WC tested up to: 9.0
+*/
+
+/*
+ * NOTE: This file only carries the theme header WordPress reads.
+ * Actual styles live in /assets/css/ (tokens.css → kadence-bridge.css →
+ * main.css), enqueued from functions.php in that cascade order.
+ */
