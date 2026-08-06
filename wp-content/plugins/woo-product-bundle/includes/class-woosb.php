@@ -142,6 +142,10 @@ if ( ! class_exists( 'WPCleverWoosb' ) && class_exists( 'WC_Product' ) ) {
             // Update stock status
             add_action( 'woocommerce_product_set_stock_status', [ $this, 'update_stock_status' ], 10, 3 );
             add_action( 'woocommerce_variation_set_stock_status', [ $this, 'update_stock_status' ], 10, 3 );
+
+            // Update bundle price when a child product price changes
+            add_action( 'woocommerce_update_product', [ $this, 'update_bundle_price_on_product_save' ] );
+            add_action( 'woocommerce_update_product_variation', [ $this, 'update_bundle_price_on_variation_save' ] );
         }
 
         function init() {
@@ -768,7 +772,9 @@ if ( ! class_exists( 'WPCleverWoosb' ) && class_exists( 'WC_Product' ) ) {
                     $cart_item['data']->build_items( $cart_item['woosb_ids'] );
 
                     // set tax status 'none'
-                    $cart_item['data']->set_tax_status( 'none' );
+                    if ( apply_filters( 'woosb_ignore_tax_for_bundles', true ) ) {
+                        $cart_item['data']->set_tax_status( 'none' );
+                    }
 
                     // set price zero, calculate later
                     if ( isset( $cart_item['woosb_discount_amount'] ) && $cart_item['woosb_discount_amount'] ) {
@@ -1516,6 +1522,150 @@ if ( ! class_exists( 'WPCleverWoosb' ) && class_exists( 'WC_Product' ) ) {
                     }
                 }
             }
+        }
+
+        /**
+         * Triggered when a simple/variable product is saved.
+         * Finds all bundles containing this product and recalculates their price.
+         *
+         * @param int $product_id Saved product ID.
+         */
+        function update_bundle_price_on_product_save( $product_id ) {
+            $product = wc_get_product( $product_id );
+
+            // Only process non-bundle products to avoid infinite loops
+            if ( ! $product || $product->is_type( 'woosb' ) ) {
+                return;
+            }
+
+            $this->update_bundle_prices_for_product( $product_id );
+        }
+
+        /**
+         * Triggered when a product variation is saved.
+         * Finds all bundles containing the parent variable product and recalculates their price.
+         *
+         * @param int $variation_id Saved variation ID.
+         */
+        function update_bundle_price_on_variation_save( $variation_id ) {
+            $parent_id = wp_get_post_parent_id( $variation_id );
+
+            if ( $parent_id ) {
+                $this->update_bundle_prices_for_product( $parent_id );
+            }
+
+            // Also search bundles containing the variation directly
+            $this->update_bundle_prices_for_product( $variation_id );
+        }
+
+        /**
+         * Find all bundles containing the given product ID and update their stored prices.
+         * Only updates bundles that use auto price (not fixed price).
+         *
+         * @param int $product_id The product ID to search for in bundles.
+         */
+        function update_bundle_prices_for_product( $product_id ) {
+            if ( ! apply_filters( 'woosb_auto_update_bundle_price', true ) ) {
+                return;
+            }
+
+            $bundles = self::get_bundles( $product_id, 500, 0, 'edit' );
+
+            if ( empty( $bundles ) ) {
+                return;
+            }
+
+            foreach ( $bundles as $bundle ) {
+                // Skip bundles using fixed price
+                if ( $bundle->is_fixed_price() ) {
+                    continue;
+                }
+
+                $this->recalculate_bundle_price( $bundle );
+            }
+        }
+
+        /**
+         * Recalculate and persist the price of a bundle product based on its child items.
+         *
+         * @param WC_Product_Woosb $bundle The bundle product.
+         */
+        function recalculate_bundle_price( $bundle ) {
+            $bundle_id = $bundle->get_id();
+            $items     = $bundle->get_items();
+
+            if ( empty( $items ) ) {
+                return;
+            }
+
+            $regular_price = 0.0;
+
+            foreach ( $items as $item ) {
+                if ( empty( $item['id'] ) ) {
+                    continue;
+                }
+
+                $_product = wc_get_product( $item['id'] );
+
+                if ( ! $_product || $_product->is_type( 'woosb' ) ) {
+                    continue;
+                }
+
+                if ( $_product->is_type( 'variable' ) ) {
+                    $regular_price += (float) $_product->get_variation_regular_price( 'max' ) * (float) $item['qty'];
+                } else {
+                    $regular_price += (float) $_product->get_regular_price() * (float) $item['qty'];
+                }
+            }
+
+            // Calculate sale price if discount is configured
+            $discount_amount     = $bundle->get_discount_amount();
+            $discount_percentage = $bundle->get_discount_percentage();
+            $sale_price          = '';
+
+            if ( $discount_amount || $discount_percentage ) {
+                $sale_price_calc = 0.0;
+
+                foreach ( $items as $item ) {
+                    if ( empty( $item['id'] ) ) {
+                        continue;
+                    }
+
+                    $_product = wc_get_product( $item['id'] );
+
+                    if ( ! $_product || $_product->is_type( 'woosb' ) ) {
+                        continue;
+                    }
+
+                    $_price = (float) $this->helper->get_price( $_product ) * (float) $item['qty'];
+
+                    if ( $discount_percentage ) {
+                        $sale_price_calc += $this->helper->round_price( $_price * ( 100 - $discount_percentage ) / 100 );
+                    } else {
+                        $sale_price_calc += $_price;
+                    }
+                }
+
+                $sale_price = $discount_amount ? ( $sale_price_calc - $discount_amount ) : $sale_price_calc;
+            }
+
+            // Determine the active price (sale price takes priority if available)
+            $price = $sale_price !== '' ? $sale_price : $regular_price;
+
+            // Persist calculated prices to post_meta so WooCommerce search/filter works correctly
+            update_post_meta( $bundle_id, '_regular_price', $regular_price );
+            update_post_meta( $bundle_id, '_price', $price );
+
+            if ( $sale_price !== '' ) {
+                update_post_meta( $bundle_id, '_sale_price', $sale_price );
+            } else {
+                delete_post_meta( $bundle_id, '_sale_price' );
+            }
+
+            // Clear the WooCommerce product cache so the updated meta is reflected immediately
+            wc_delete_product_transients( $bundle_id );
+
+            do_action( 'woosb_after_update_bundle_price', $bundle_id, $regular_price, $sale_price, $price );
         }
 
         function show_bundled( $product = null ) {

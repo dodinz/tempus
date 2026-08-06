@@ -3886,6 +3886,17 @@ namespace KadenceWP\KadenceBlocks {
     array (
     ),
   ),
+  'LiquidWeb\\Harbor\\Licensing\\Validation_State' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Validation_State',
+    'isabstract' => false,
+    'namespace' => 'LiquidWeb\\Harbor\\Licensing',
+    'extends' => 'KadenceWP\\KadenceBlocks\\LiquidWeb\\Harbor\\Licensing\\Validation_State',
+    'implements' => 
+    array (
+    ),
+  ),
   'LiquidWeb\\Harbor\\Notice\\Notice' => 
   array (
     'type' => 'class',

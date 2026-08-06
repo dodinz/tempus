@@ -267,12 +267,14 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 				$is_in_stock      = $this->helper->is_in_stock( $_product );
 				$has_enough_stock = $this->helper->has_enough_stock( $_product, $_qty );
 
-				if ( $is_in_stock && $has_enough_stock ) {
-					$all_out_of_stock = false;
-				}
-
+				// Skip unpurchasable products before updating $all_out_of_stock,
+				// so only valid/purchasable items influence the bundle's stock state.
 				if ( $exclude_unpurchasable && ( ! $_product->is_purchasable() || ! $is_in_stock ) ) {
 					continue;
+				}
+
+				if ( $is_in_stock && $has_enough_stock ) {
+					$all_out_of_stock = false;
 				}
 
 				if ( $_qty && ( $_product->get_stock_status( $context ) === 'outofstock' || ! $has_enough_stock ) ) {
@@ -332,17 +334,21 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 
 				$_product = $this->get_bundled_product_object( $item['id'] );
 
-				// Cache stock quantity to avoid multiple calls
-				$stock_quantity = $this->helper->get_stock_quantity( $_product );
-
-				// Skip invalid products or those not meeting criteria
+				// Skip invalid products or those not meeting criteria before calling get_stock_quantity
 				if (
 					! $_product ||
 					$_product->is_type( 'woosb' ) ||
 					! $_product->get_manage_stock() ||
-					$stock_quantity === null ||
+					$_product->backorders_allowed() ||
 					( $exclude_unpurchasable && ( ! $_product->is_purchasable() || ! $this->helper->is_in_stock( $_product ) ) )
 				) {
+					continue;
+				}
+
+				// Get stock quantity only after product is validated
+				$stock_quantity = $this->helper->get_stock_quantity( $_product );
+
+				if ( $stock_quantity === null ) {
 					continue;
 				}
 

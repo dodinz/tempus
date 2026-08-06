@@ -2,9 +2,9 @@
   'root' => 
   array (
     'name' => 'kadencewp/kadence-blocks',
-    'pretty_version' => '3.7.8',
-    'version' => '3.7.8.0',
-    'reference' => '1aa7a45a1f7a64ced56fcf57d595cf2a530bac17',
+    'pretty_version' => '3.7.9',
+    'version' => '3.7.9.0',
+    'reference' => 'da9820521f1a3694f2fa37fd6c0d6281b576fbd6',
     'type' => 'wordpress-plugin',
     'install_path' => __DIR__ . '/../',
     'aliases' => 
@@ -208,9 +208,9 @@
     ),
     'stellarwp/harbor' => 
     array (
-      'pretty_version' => 'v1.4.0',
-      'version' => '1.4.0.0',
-      'reference' => '0d21b6e6da4352364610168c053ed0ec9d59253d',
+      'pretty_version' => 'v1.6.0',
+      'version' => '1.6.0.0',
+      'reference' => 'e0253fa5512522a50dd73abe990d3591017494fb',
       'type' => 'library',
       'install_path' => __DIR__ . '/../stellarwp/harbor',
       'aliases' => 
@@ -400,9 +400,9 @@
     ),
     'symfony/mime' => 
     array (
-      'pretty_version' => 'v5.4.45',
-      'version' => '5.4.45.0',
-      'reference' => '8c1b9b3e5b52981551fc6044539af1d974e39064',
+      'pretty_version' => 'v5.4.52',
+      'version' => '5.4.52.0',
+      'reference' => '8f89d3a319b92486b0bcc43c0479d19fdb0e2f64',
       'type' => 'library',
       'install_path' => __DIR__ . '/../symfony/mime',
       'aliases' => 
