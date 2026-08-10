@@ -20,6 +20,7 @@ if ( ! class_exists( 'WPCleverWoosb_Helper' ) ) {
 		];
 		protected static $bundles_cache = [];
 		protected static $bundled_cache = [];
+		protected static ?bool $_check_variations_stock = null;
 
 		public static function instance(): self {
 			if ( is_null( self::$instance ) ) {
@@ -110,6 +111,17 @@ if ( ! class_exists( 'WPCleverWoosb_Helper' ) ) {
 			$product->set_price( $price );
 		}
 
+		/**
+		 * Cache the woosb_check_variations_stock filter result (request-level).
+		 */
+		protected static function check_variations_stock(): bool {
+			if ( self::$_check_variations_stock === null ) {
+				self::$_check_variations_stock = (bool) apply_filters( 'woosb_check_variations_stock', true );
+			}
+
+			return self::$_check_variations_stock;
+		}
+
 		public static function is_in_stock( $product ) {
 			if ( $product->is_type( 'variable' ) ) {
 				return $product->child_is_in_stock() || $product->child_is_on_backorder();
@@ -123,7 +135,7 @@ if ( ! class_exists( 'WPCleverWoosb_Helper' ) ) {
 				return false;
 			}
 
-			if ( $product->is_type( 'variable' ) && apply_filters( 'woosb_check_variations_stock', true ) ) {
+			if ( $product->is_type( 'variable' ) && self::check_variations_stock() ) {
 				$variations = $product->get_available_variations( 'objects' );
 
 				foreach ( $variations as $variation ) {
@@ -143,7 +155,7 @@ if ( ! class_exists( 'WPCleverWoosb_Helper' ) ) {
 				return null;
 			}
 
-			if ( $product->is_type( 'variable' ) && apply_filters( 'woosb_check_variations_stock', true ) ) {
+			if ( $product->is_type( 'variable' ) && self::check_variations_stock() ) {
 				$stock_quantity = null;
 				$variations     = $product->get_available_variations( 'objects' );
 

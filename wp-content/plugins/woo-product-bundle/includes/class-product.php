@@ -8,6 +8,15 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 		protected $bundled_products = [];
 		protected $helper = null;
 
+		// Static request-level caches for filter/option results (live for the duration of one PHP request)
+		protected static ?bool $_inventory_disabled    = null;
+		protected static ?bool $_global_stock_on       = null;
+		protected static ?bool $_manage_stock_optional = null;
+
+		// Instance-level caches (invalidated when items change via build_items)
+		protected ?array $stock_data_cache            = null;
+		protected ?bool  $exclude_unpurchasable_cache = null;
+
 		public function __construct( $product = 0 ) {
 			// Cache helper instance
 			$this->helper = WPCleverWoosb_Helper();
@@ -182,141 +191,272 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 			return parent::get_price( $context );
 		}
 
-		public function get_manage_stock( $context = 'view' ) {
-			$parent_manage = parent::get_manage_stock( $context );
-
-			// Early return if stock management is disabled globally or via filter
-			if (
-				'yes' !== get_option( 'woocommerce_manage_stock' ) ||
-				apply_filters( 'woosb_disable_inventory_management', false )
-			) {
-				return $parent_manage;
+		/**
+		 * Cache the woosb_disable_inventory_management filter result (request-level).
+		 */
+		protected static function is_inventory_disabled(): bool {
+			if ( self::$_inventory_disabled === null ) {
+				self::$_inventory_disabled = (bool) apply_filters( 'woosb_disable_inventory_management', false );
 			}
 
-			// Early return if no items or has optional items
-			if ( empty( $this->items ) || ( $this->has_optional() && ! apply_filters( 'woosb_manage_stock_optional_items', false ) ) ) {
-				return $parent_manage;
+			return self::$_inventory_disabled;
+		}
+
+		/**
+		 * Cache the woocommerce_manage_stock option (request-level).
+		 */
+		protected static function is_global_stock_on(): bool {
+			if ( self::$_global_stock_on === null ) {
+				self::$_global_stock_on = 'yes' === get_option( 'woocommerce_manage_stock' );
 			}
 
+			return self::$_global_stock_on;
+		}
+
+		/**
+		 * Cache the woosb_manage_stock_optional_items filter result (request-level).
+		 */
+		protected static function is_manage_stock_optional_enabled(): bool {
+			if ( self::$_manage_stock_optional === null ) {
+				self::$_manage_stock_optional = (bool) apply_filters( 'woosb_manage_stock_optional_items', false );
+			}
+
+			return self::$_manage_stock_optional;
+		}
+
+		/**
+		 * Compute all bundle stock data in a single loop over items.
+		 * Cached at instance level and invalidated when items change via build_items().
+		 *
+		 * Replaces five separate item-loops (one per stock method) with a single pass,
+		 * eliminating redundant wc_get_product calls, filter evaluations, and expensive
+		 * get_available_variations() calls on variable products.
+		 *
+		 * @return array{
+		 *   computed: bool,
+		 *   skip_optional: bool,
+		 *   stock_status: string|null,
+		 *   manages_stock: bool|null,
+		 *   min_stock_quantity: int|null,
+		 *   backorders: string|null,
+		 *   sold_individually: bool|null,
+		 * }
+		 */
+		protected function compute_stock_data(): array {
+			if ( $this->stock_data_cache !== null ) {
+				return $this->stock_data_cache;
+			}
+
+			$defaults = [
+				'computed'           => false,
+				'skip_optional'      => false,
+				'stock_status'       => null,
+				'manages_stock'      => null,
+				'min_stock_quantity' => null,
+				'backorders'         => null,
+				'sold_individually'  => null,
+			];
+
+			// Hard guards: inventory disabled or no items → all stock methods return parent value
+			if ( self::is_inventory_disabled() || empty( $this->items ) ) {
+				return $this->stock_data_cache = $defaults;
+			}
+
+			$has_optional          = $this->has_optional();
+			$skip_optional         = $has_optional && ! self::is_manage_stock_optional_enabled();
 			$exclude_unpurchasable = $this->exclude_unpurchasable();
+			$check_global_stock    = self::is_global_stock_on();
+
+			$manages_stock              = false;
+			$stock_status               = 'instock';
+			$all_out_of_stock           = true;
+			$backorders                 = 'yes';
+			$sold_individually          = false;
+			$available_qty              = [];
+			$available_qty_no_backorder = [];
+			$is_outofstock              = false;
+			$has_backorder_item         = false;
 
 			foreach ( $this->items as $item ) {
 				$product = $this->get_bundled_product_object( $item['id'] );
 
-				// Skip invalid products or those meeting exclusion criteria
-				if (
-					! $product ||
-					$product->is_type( 'woosb' ) ||
-					( $exclude_unpurchasable &&
-					  ( ! $product->is_purchasable() || ! $this->helper->is_in_stock( $product ) ) )
-				) {
+				if ( ! $product || $product->is_type( 'woosb' ) ) {
 					continue;
 				}
 
-				// Return true if the product manages stock
-				if ( $product->get_manage_stock( $context ) === true ) {
-					return true;
-				}
+				$is_purchasable = $product->is_purchasable();
+				$is_in_stock    = $this->helper->is_in_stock( $product );
 
-				// Check the parent product if this is a variation
-				if ( $product->is_type( 'variation' ) ) {
-					$parent_product = $this->get_bundled_product_object( $product->get_parent_id() );
-
-					if ( $parent_product && $parent_product->get_manage_stock( $context ) === true ) {
-						return true;
-					}
-				}
-			}
-
-			// Return parent manages stock setting if this product manages stock
-			return $this->is_manage_stock() ? $parent_manage : false;
-		}
-
-		public function get_stock_status( $context = 'view' ) {
-			$parent_status = parent::get_stock_status( $context );
-
-			// Early return if inventory management is disabled
-			if ( apply_filters( 'woosb_disable_inventory_management', false ) ) {
-				return $parent_status;
-			}
-
-			// Early return if no items
-			if ( empty( $this->items ) ) {
-				return $parent_status;
-			}
-
-			$exclude_unpurchasable = $this->exclude_unpurchasable();
-			$stock_status          = 'instock';
-			$all_out_of_stock      = true;
-
-			foreach ( $this->items as $item ) {
-				// Skip if the product doesn't exist
-				$_product = $this->get_bundled_product_object( $item['id'] );
-
-				if ( ! $_product || $_product->is_type( 'woosb' ) ) {
+				if ( $exclude_unpurchasable && ( ! $is_purchasable || ! $is_in_stock ) ) {
 					continue;
 				}
 
+				// ── stock_status: always computed regardless of optional guard ──────────────
 				$_qty = (float) $item['qty'];
 
 				if ( ! empty( $item['optional'] ) ) {
 					$_qty = ! empty( $item['min'] ) ? (float) $item['min'] : 0;
 				}
 
-				// Cache commonly used method results
-				$is_in_stock      = $this->helper->is_in_stock( $_product );
-				$has_enough_stock = $this->helper->has_enough_stock( $_product, $_qty );
+				$has_enough = $this->helper->has_enough_stock( $product, $_qty );
 
-				// Skip unpurchasable products before updating $all_out_of_stock,
-				// so only valid/purchasable items influence the bundle's stock state.
-				if ( $exclude_unpurchasable && ( ! $_product->is_purchasable() || ! $is_in_stock ) ) {
-					continue;
-				}
-
-				if ( $is_in_stock && $has_enough_stock ) {
+				if ( $is_in_stock && $has_enough ) {
 					$all_out_of_stock = false;
 				}
 
-				if ( $_qty && ( $_product->get_stock_status( $context ) === 'outofstock' || ! $has_enough_stock ) ) {
-					return 'outofstock';
+				if ( ! $is_outofstock && $_qty && ( $product->get_stock_status() === 'outofstock' || ( ! $has_enough && ! $product->backorders_allowed() ) ) ) {
+					$is_outofstock = true;
 				}
 
+				if ( $product->get_stock_status() === 'onbackorder' || ( $_qty && ! $has_enough && $product->backorders_allowed() ) ) {
+					$has_backorder_item = true;
+				}
+
+				// ── Skip optional-guarded fields when bundle has optional items ───────────
+				if ( $skip_optional ) {
+					continue;
+				}
+
+				// ── manages_stock (only when global WC stock management is enabled) ───────
+				if ( $check_global_stock && ! $manages_stock ) {
+					if ( $product->get_manage_stock() === true ) {
+						$manages_stock = true;
+					} elseif ( $product->is_type( 'variation' ) ) {
+						$parent = $this->get_bundled_product_object( $product->get_parent_id() );
+
+						if ( $parent && $parent->get_manage_stock() === true ) {
+							$manages_stock = true;
+						}
+					}
+				}
+
+				// ── sold_individually ────────────────────────────────────────────────────
+				if ( ! $sold_individually && $product->is_sold_individually() ) {
+					$sold_individually = true;
+				}
+
+				// ── backorders (only for items that manage their own stock) ───────────────
+				if ( $backorders !== 'no' && $product->get_manage_stock() ) {
+					$product_backorders = $product->get_backorders();
+
+					if ( $product_backorders === 'no' ) {
+						$backorders = 'no';
+					} elseif ( $product_backorders === 'notify' ) {
+						$backorders = 'notify';
+					}
+				}
+
+				// ── min_stock_quantity (only when global WC stock management is enabled) ─
 				if (
-					$_product->get_stock_status( $context ) === 'onbackorder' ||
-					( $_qty && ! $has_enough_stock && $_product->backorders_allowed() )
+					$check_global_stock &&
+					$_qty > 0 &&
+					$product->get_manage_stock()
 				) {
-					$stock_status = 'onbackorder';
+					$qty = $this->helper->get_stock_quantity( $product );
+
+					if ( $qty !== null ) {
+						$calc_qty        = floor( $qty / $_qty );
+						$available_qty[] = $calc_qty;
+
+						if ( ! $product->backorders_allowed() ) {
+							$available_qty_no_backorder[] = $calc_qty;
+						}
+					}
 				}
 			}
 
-			if ( $all_out_of_stock ) {
-				return 'outofstock';
+			// Calculate minimum available stock quantity
+			$min_stock_qty = null;
+			if ( ! empty( $available_qty_no_backorder ) ) {
+				// Items without backorders limit the available physical stock quantity
+				$min_stock_qty = min( $available_qty_no_backorder );
+			} elseif ( ! empty( $available_qty ) ) {
+				$min_stock_qty = min( $available_qty );
+			}
+
+			// Determine final stock status
+			if ( $is_outofstock || $all_out_of_stock || ( $min_stock_qty !== null && $min_stock_qty <= 0 && $backorders === 'no' ) ) {
+				$final_status = 'outofstock';
+			} elseif ( $min_stock_qty !== null && $min_stock_qty > 0 ) {
+				$final_status = 'instock';
+			} elseif ( $has_backorder_item || ( $min_stock_qty !== null && $min_stock_qty <= 0 ) ) {
+				$final_status = 'onbackorder';
+			} else {
+				$final_status = $stock_status;
+			}
+
+			return $this->stock_data_cache = [
+				'computed'           => true,
+				'skip_optional'      => $skip_optional,
+				'stock_status'       => $final_status,
+				'manages_stock'      => ( $skip_optional || ! $check_global_stock ) ? null : $manages_stock,
+				'min_stock_quantity' => ( $skip_optional || ! $check_global_stock ) ? null : $min_stock_qty,
+				'backorders'         => ( $skip_optional || ! $manages_stock ) ? null : $backorders,
+				'sold_individually'  => $skip_optional ? null : $sold_individually,
+			];
+		}
+
+		public function get_manage_stock( $context = 'view' ) {
+			$parent_manage = parent::get_manage_stock( $context );
+
+			// Early return if global stock management is disabled
+			if ( ! self::is_global_stock_on() ) {
+				return $parent_manage;
+			}
+
+			$data = $this->compute_stock_data();
+
+			// Guards triggered or manages_stock not computed (optional items present)
+			if ( ! $data['computed'] || $data['manages_stock'] === null ) {
+				return $parent_manage;
+			}
+
+			if ( $data['manages_stock'] ) {
+				return true;
+			}
+
+			return $this->is_manage_stock() ? $parent_manage : false;
+		}
+
+		public function get_stock_status( $context = 'view' ) {
+			$parent_status = parent::get_stock_status( $context );
+			$data          = $this->compute_stock_data();
+
+			if ( ! $data['computed'] || $data['stock_status'] === null ) {
+				return $parent_status;
 			}
 
 			if ( $this->is_manage_stock() ) {
-				return $parent_status === 'instock' ? $stock_status : $parent_status;
+				return $parent_status === 'instock' ? $data['stock_status'] : $parent_status;
 			}
 
-			return $stock_status;
+			return $data['stock_status'];
 		}
 
 		public function get_stock_quantity( $context = 'view' ) {
 			$parent_quantity = parent::get_stock_quantity( $context );
 
-			// Early return if stock management is disabled
-			if (
-				'yes' !== get_option( 'woocommerce_manage_stock' ) ||
-				apply_filters( 'woosb_disable_inventory_management', false )
-			) {
+			// Early return if global stock management is disabled
+			if ( ! self::is_global_stock_on() ) {
 				return $parent_quantity;
 			}
 
-			$product_id            = $this->id;
-			$exclude_unpurchasable = $this->exclude_unpurchasable();
-			$items                 = $this->items;
+			$product_id = $this->id;
+			$data       = $this->compute_stock_data();
 
-			// Early return if no items or has optional items
-			if ( ! $items || ( $this->has_optional() && ! apply_filters( 'woosb_manage_stock_optional_items', false ) ) ) {
+			if ( ! $data['computed'] ) {
+				// Guards triggered: sync _stock unless inventory management is fully disabled
+				if ( ! self::is_inventory_disabled() && apply_filters( 'woosb_update_stock', true ) ) {
+					update_post_meta( $product_id, '_stock', $parent_quantity );
+				}
+
+				return $parent_quantity;
+			}
+
+			$min_available = $data['min_stock_quantity'];
+
+			// No managing items found (all skipped or backorders allowed)
+			if ( $min_available === null ) {
 				if ( apply_filters( 'woosb_update_stock', true ) ) {
 					update_post_meta( $product_id, '_stock', $parent_quantity );
 				}
@@ -324,50 +464,7 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 				return $parent_quantity;
 			}
 
-			$available_qty = [];
-
-			foreach ( $items as $item ) {
-				// Skip if quantity is not positive
-				if ( $item['qty'] <= 0 ) {
-					continue;
-				}
-
-				$_product = $this->get_bundled_product_object( $item['id'] );
-
-				// Skip invalid products or those not meeting criteria before calling get_stock_quantity
-				if (
-					! $_product ||
-					$_product->is_type( 'woosb' ) ||
-					! $_product->get_manage_stock() ||
-					$_product->backorders_allowed() ||
-					( $exclude_unpurchasable && ( ! $_product->is_purchasable() || ! $this->helper->is_in_stock( $_product ) ) )
-				) {
-					continue;
-				}
-
-				// Get stock quantity only after product is validated
-				$stock_quantity = $this->helper->get_stock_quantity( $_product );
-
-				if ( $stock_quantity === null ) {
-					continue;
-				}
-
-				$available_qty[] = floor( $stock_quantity / (float) $item['qty'] );
-			}
-
-			// If no available quantities found, update and return the parent quantity
-			if ( empty( $available_qty ) ) {
-				if ( apply_filters( 'woosb_update_stock', true ) ) {
-					update_post_meta( $product_id, '_stock', $parent_quantity );
-				}
-
-				return $parent_quantity;
-			}
-
-			// Find minimum available quantity without sorting a full array
-			$min_available = min( $available_qty );
-
-			// Use parent quantity if it's lower and stock is managed
+			// Use parent quantity if it's lower and bundle itself manages stock
 			if ( $this->is_manage_stock() && $parent_quantity < $min_available ) {
 				if ( apply_filters( 'woosb_update_stock', true ) ) {
 					update_post_meta( $product_id, '_stock', $parent_quantity );
@@ -385,89 +482,28 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 
 		public function get_backorders( $context = 'view' ) {
 			$parent_backorders = parent::get_backorders( $context );
+			$data              = $this->compute_stock_data();
 
-			// Early return if inventory management is disabled
-			if ( apply_filters( 'woosb_disable_inventory_management', false ) ) {
+			if ( ! $data['computed'] || $data['backorders'] === null ) {
 				return $parent_backorders;
 			}
 
-			// Early return if no items or has optional items
-			if ( empty( $this->items ) || ( $this->has_optional() && ! apply_filters( 'woosb_manage_stock_optional_items', false ) ) ) {
-				return $parent_backorders;
-			}
-
-			$backorders            = 'yes';
-			$exclude_unpurchasable = $this->exclude_unpurchasable();
-
-			foreach ( $this->items as $item ) {
-				// Get product once
-				$product = $this->get_bundled_product_object( $item['id'] ?: 0 );
-
-				// Skip if the product doesn't meet criteria
-				if ( ! $product || ! is_a( $product, 'WC_Product' ) || $product->is_type( 'woosb' ) ) {
-					continue;
-				}
-
-				// Skip if the product doesn't meet criteria
-				if ( ! $product->get_manage_stock() || ( $exclude_unpurchasable && ( ! $product->is_purchasable() || ! $this->helper->is_in_stock( $product ) ) ) ) {
-					continue;
-				}
-
-				// Check backorders status
-				$product_backorders = $product->get_backorders( $context );
-
-				if ( $product_backorders === 'no' ) {
-					return 'no';
-				}
-
-				if ( $product_backorders === 'notify' ) {
-					$backorders = 'notify';
-				}
-			}
-
-			// Simplified return logic
 			if ( $this->is_manage_stock() ) {
-				return $parent_backorders === 'yes' ? $backorders : $parent_backorders;
+				return $parent_backorders === 'yes' ? $data['backorders'] : $parent_backorders;
 			}
 
-			return $backorders;
+			return $data['backorders'];
 		}
 
 		public function get_sold_individually( $context = 'view' ) {
 			$parent_individually = parent::get_sold_individually( $context );
+			$data                = $this->compute_stock_data();
 
-			// Early return if inventory management is disabled
-			if ( apply_filters( 'woosb_disable_inventory_management', false ) ) {
+			if ( ! $data['computed'] || $data['sold_individually'] === null ) {
 				return $parent_individually;
 			}
 
-			// Early return if no items or has optional items
-			if ( empty( $this->items ) || ( $this->has_optional() && ! apply_filters( 'woosb_manage_stock_optional_items', false ) ) ) {
-				return $parent_individually;
-			}
-
-			$exclude_unpurchasable = $this->exclude_unpurchasable();
-
-			foreach ( $this->items as $item ) {
-				$product = wc_get_product( $item['id'] );
-
-				// Skip invalid products or those meeting exclusion criteria
-				if (
-					! $product ||
-					$product->is_type( 'woosb' ) ||
-					( $exclude_unpurchasable &&
-					  ( ! $product->is_purchasable() || ! $this->helper->is_in_stock( $product ) ) )
-				) {
-					continue;
-				}
-
-				// Return true if any product is sold individually
-				if ( $product->is_sold_individually() ) {
-					return true;
-				}
-			}
-
-			return $parent_individually;
+			return $data['sold_individually'] ?: $parent_individually;
 		}
 
 		public function needs_shipping() {
@@ -528,15 +564,17 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 		}
 
 		public function exclude_unpurchasable() {
-			// Get meta-value once
-			$exclude_unpurchasable = $this->get_meta( 'woosb_exclude_unpurchasable' );
+			if ( $this->exclude_unpurchasable_cache === null ) {
+				$exclude_unpurchasable = $this->get_meta( 'woosb_exclude_unpurchasable' );
 
-			// Check if we need to use the default setting
-			if ( ! $exclude_unpurchasable || in_array( $exclude_unpurchasable, [ 'unset', 'default' ], true ) ) {
-				$exclude_unpurchasable = $this->helper->get_setting( 'exclude_unpurchasable', 'no' );
+				if ( ! $exclude_unpurchasable || in_array( $exclude_unpurchasable, [ 'unset', 'default' ], true ) ) {
+					$exclude_unpurchasable = $this->helper->get_setting( 'exclude_unpurchasable', 'no' );
+				}
+
+				$this->exclude_unpurchasable_cache = (bool) apply_filters( 'woosb_exclude_unpurchasable', $exclude_unpurchasable === 'yes', $this );
 			}
 
-			return apply_filters( 'woosb_exclude_unpurchasable', $exclude_unpurchasable === 'yes', $this );
+			return $this->exclude_unpurchasable_cache;
 		}
 
 		public function get_discount_amount() {
@@ -725,6 +763,10 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 			}
 
 			$this->items = $items;
+
+			// Invalidate instance-level caches when items change
+			$this->stock_data_cache            = null;
+			$this->exclude_unpurchasable_cache = null;
 		}
 
 		protected function preload_meta() {

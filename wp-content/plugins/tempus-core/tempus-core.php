@@ -42,7 +42,6 @@ function tempus_core_legacy_theme_active() {
 if ( ! tempus_core_legacy_theme_active() ) {
 	require_once TEMPUS_CORE_DIR . 'includes/helpers.php';
 	require_once TEMPUS_CORE_DIR . 'includes/taxonomy.php';
-	require_once TEMPUS_CORE_DIR . 'includes/acf-fields.php';
 	require_once TEMPUS_CORE_DIR . 'includes/woocommerce.php';
 }
 

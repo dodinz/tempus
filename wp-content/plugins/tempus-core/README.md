@@ -7,11 +7,10 @@ child theme (`wp-content/themes/tempus-kadence/`).
 ## What lives here
 - `includes/taxonomy.php` — WooCommerce product categories/tags seeded in
   code (runs on plugin activation and on theme switch; safe to re-run)
-- `includes/acf-fields.php` — "Tempus — Homepage" ACF field group,
-  registered in PHP (repeaters require ACF PRO)
 - `includes/woocommerce.php` — `tempus_product_badge()` + loop badge,
   4-up / 12-per-page shop grid, age-gate hook stub
-- `includes/helpers.php` — `tempus_field()` ACF-with-fallback helper
+- `includes/helpers.php` — `tempus_field()` ACF-with-fallback helper, used
+  by the `tempus-kadence` homepage template-parts to read ACF fields
 
 ## Legacy-theme handoff
 While the old standalone **tempus** theme is the active theme, this plugin

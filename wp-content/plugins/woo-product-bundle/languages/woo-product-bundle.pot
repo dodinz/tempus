@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPC Product Bundles for WooCommerce 8.6.1\n"
+"Project-Id-Version: WPC Product Bundles for WooCommerce 8.6.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woo-product-bundle\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-03T09:08:44+00:00\n"
+"POT-Creation-Date: 2026-08-07T02:06:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: woo-product-bundle\n"
@@ -635,8 +635,8 @@ msgstr ""
 
 #: includes/class-backend.php:856
 #: includes/class-backend.php:890
-#: includes/class-product.php:52
-#: includes/class-product.php:64
+#: includes/class-product.php:61
+#: includes/class-product.php:73
 msgid "Add to cart"
 msgstr ""
 
@@ -645,7 +645,7 @@ msgid "For purchasable bundle."
 msgstr ""
 
 #: includes/class-backend.php:866
-#: includes/class-product.php:52
+#: includes/class-product.php:61
 msgid "Select options"
 msgstr ""
 
@@ -654,7 +654,7 @@ msgid "For purchasable bundle and has variable product(s)."
 msgstr ""
 
 #: includes/class-backend.php:876
-#: includes/class-product.php:49
+#: includes/class-product.php:58
 msgid "Read more"
 msgstr ""
 
