@@ -1401,6 +1401,10 @@ class Ai1wm_Main_Controller {
 	 */
 	public function add_map_meta_cap( $caps, $cap, $user_id, $args ) {
 		if ( $cap === 'ai1wm_import_site' ) {
+			if ( is_multisite() ) {
+				return array( 'import', 'manage_network_plugins', 'manage_network_themes' );
+			}
+
 			return array( 'import', 'install_plugins', 'install_themes' );
 		}
 

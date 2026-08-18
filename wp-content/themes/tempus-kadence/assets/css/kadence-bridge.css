@@ -189,3 +189,12 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--focus-ring);
 }
 ::placeholder { color: var(--ink-faint); }
+
+.single-content h1, .single-content h2, .single-content h3, .single-content h4, .single-content h5, .single-content h6 {
+  margin:0;
+}
+
+.tz-hero__cta .tz-btn--lg {
+  padding: 0 45px;
+  font-size: 14px;
+}

@@ -44,6 +44,25 @@ function tempus_kadence_assets() {
 add_action( 'wp_enqueue_scripts', 'tempus_kadence_assets', 20 );
 
 /**
+ * Single-product page styling — loaded only on WooCommerce product pages.
+ *
+ * Depends on 'tempus-tokens' so tokens.css loads first: product-page.css
+ * reads the brand colours from those CSS variables, so the product page
+ * tracks the homepage design automatically.
+ */
+function tempus_kadence_product_assets() {
+	if ( function_exists( 'is_product' ) && is_product() ) {
+		wp_enqueue_style(
+			'tempus-product-page',
+			get_stylesheet_directory_uri() . '/assets/css/product-page.css',
+			array( 'tempus-tokens' ),
+			TEMPUS_KADENCE_VERSION
+		);
+	}
+}
+add_action( 'wp_enqueue_scripts', 'tempus_kadence_product_assets', 20 );
+
+/**
  * -----------------------------------------------------------------
  * Kadence Global Styles ← Tempus tokens
  * -----------------------------------------------------------------

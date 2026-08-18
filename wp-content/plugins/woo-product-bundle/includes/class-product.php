@@ -365,21 +365,49 @@ if ( ! class_exists( 'WC_Product_Woosb' ) && class_exists( 'WC_Product' ) ) {
 				}
 			}
 
-			// Calculate minimum available stock quantity
+			// Calculate minimum available stock quantity.
+			//
+			// Two modes are available via the 'woosb_stock_quantity_mode' filter:
+			//
+			// 'hard_limit' (default):
+			//   Stock quantity = min of items WITHOUT backorders.
+			//   Items that allow backorders are not a hard constraint — they can always go
+			//   onbackorder, so only no-backorder items define the upper purchasable limit.
+			//   Example: SP1(1, backorder) + SP2(100, no backorder) → bundle stock = 100.
+			//
+			// 'physical':
+			//   Stock quantity = min of ALL managed-stock items regardless of backorder setting.
+			//   More conservative — surfaces the lowest physical stock count directly.
+			//   Example: SP1(1, backorder) + SP2(100, no backorder) → bundle stock = 1.
+			//
+			// Usage:
+			//   add_filter( 'woosb_stock_quantity_mode', fn() => 'physical' );
+			$stock_qty_mode = apply_filters( 'woosb_stock_quantity_mode', 'hard_limit' );
+
 			$min_stock_qty = null;
-			if ( ! empty( $available_qty_no_backorder ) ) {
-				// Items without backorders limit the available physical stock quantity
+			if ( 'physical' === $stock_qty_mode ) {
+				// Physical mode: conservative — min across ALL managed-stock items.
+				$min_stock_qty = ! empty( $available_qty ) ? min( $available_qty ) : null;
+			} elseif ( ! empty( $available_qty_no_backorder ) ) {
+				// Hard-limit mode (default): min of items that cannot fall back to backorder.
 				$min_stock_qty = min( $available_qty_no_backorder );
 			} elseif ( ! empty( $available_qty ) ) {
+				// All items allow backorders; use the lowest physical stock as a soft reference.
 				$min_stock_qty = min( $available_qty );
 			}
 
-			// Determine final stock status
+			// Physical minimum across ALL managed-stock items (including backorder-allowed ones).
+			// Used only to detect whether any item is already depleted and going onbackorder.
+			$min_all_qty = ! empty( $available_qty ) ? min( $available_qty ) : null;
+
+			// Determine final stock status.
+			// $min_stock_qty → hard purchasable limit (no-backorder items drive outofstock).
+			// $min_all_qty   → detects when any item (incl. backorder-allowed) is at/below zero.
 			if ( $is_outofstock || $all_out_of_stock || ( $min_stock_qty !== null && $min_stock_qty <= 0 && $backorders === 'no' ) ) {
 				$final_status = 'outofstock';
 			} elseif ( $min_stock_qty !== null && $min_stock_qty > 0 ) {
 				$final_status = 'instock';
-			} elseif ( $has_backorder_item || ( $min_stock_qty !== null && $min_stock_qty <= 0 ) ) {
+			} elseif ( $has_backorder_item || ( $min_all_qty !== null && $min_all_qty <= 0 ) ) {
 				$final_status = 'onbackorder';
 			} else {
 				$final_status = $stock_status;

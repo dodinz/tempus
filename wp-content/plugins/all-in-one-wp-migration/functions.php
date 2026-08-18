@@ -2477,6 +2477,7 @@ function ai1wm_allowed_html_tags() {
 		),
 		'br'     => array(),
 		'em'     => array(),
+		'h3'     => array(),
 		'i'      => array(
 			'class'       => array(),
 			'aria-hidden' => array(),

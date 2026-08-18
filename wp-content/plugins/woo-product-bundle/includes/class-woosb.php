@@ -2071,7 +2071,11 @@ if ( ! class_exists( 'WPCleverWoosb' ) && class_exists( 'WC_Product' ) ) {
                     echo '<div class="woosb-product">';
                     do_action( 'woosb_before_bundles_item', $bundle, $product );
                     echo '<div class="woosb-thumb">' . wp_kses_post( $bundle->get_image( $this->helper::get_image_size() ) ) . '</div>';
-                    echo '<div class="woosb-title"><a ' . ( $this->helper->get_setting( 'bundled_link', 'yes' ) === 'yes_popup' ? 'class="woosq-link no-ajaxy" data-id="' . esc_attr( $bundle->get_id() ) . '" data-context="woosb"' : '' ) . ' href="' . esc_url( $bundle->get_permalink() ) . '" ' . ( $this->helper->get_setting( 'bundled_link', 'yes' ) === 'yes_blank' ? 'target="_blank"' : '' ) . '>' . esc_html( $bundle->get_name() ) . '</a></div>';
+                    echo '<div class="woosb-title">';
+                    do_action( 'woosb_before_bundles_item_title', $bundle, $product );
+                    echo '<a ' . ( $this->helper->get_setting( 'bundled_link', 'yes' ) === 'yes_popup' ? 'class="woosq-link no-ajaxy" data-id="' . esc_attr( $bundle->get_id() ) . '" data-context="woosb"' : '' ) . ' href="' . esc_url( $bundle->get_permalink() ) . '" ' . ( $this->helper->get_setting( 'bundled_link', 'yes' ) === 'yes_blank' ? 'target="_blank"' : '' ) . '>' . esc_html( $bundle->get_name() ) . '</a>';
+                    do_action( 'woosb_after_bundles_item_title', $bundle, $product );
+                    echo '</div><!-- /woosb-title -->';
                     echo '<div class="woosb-price">' . wp_kses_post( $bundle->get_price_html() ) . '</div>';
                     do_action( 'woosb_after_bundles_item', $bundle, $product );
                     echo '</div><!-- /woosb-product -->';

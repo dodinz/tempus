@@ -2,9 +2,9 @@
 Contributors: yani.iliev, bangelov, pimjitsawang
 Tags: backup, clone, migrate, move-wordpress, export-import
 Requires at least: 3.3
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 5.3
-Stable tag: 7.107
+Stable tag: 7.109
 License: GPLv3 or later
 
 Trusted by 60M+ sites: The gold standard for WordPress migration and backup. Migrate, backup, and restore your WordPress site with one click.
@@ -164,6 +164,17 @@ All-in-One WP Migration is in full compliance with General Data Protection Regul
 See our [GDPR Compliant Privacy Policy here](https://www.iubenda.com/privacy-policy/946881).
 
 == Changelog ==
+= 7.109 =
+**Fixed**
+
+* File option in the Import From menu did not open the file picker, which prevented importing a backup from a local file
+
+= 7.108 =
+**Fixed**
+
+* Site import on multisite now requires network-level capabilities. Special thanks to Mohamed Bassia for responsibly disclosing this issue
+* CiviCRM attachments, contact images and extensions no longer dropped on import, only config and caches are excluded
+
 = 7.107 =
 **Added**
 

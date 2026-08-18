@@ -286,7 +286,7 @@ class Ai1wm_Rest_Controller {
 	 * @return bool
 	 */
 	public static function can_import() {
-		return current_user_can( 'ai1wm_import_site' );
+		return self::can_run_on_network() && current_user_can( 'ai1wm_import_site' );
 	}
 
 	/**
@@ -421,8 +421,8 @@ class Ai1wm_Rest_Controller {
 	 */
 	public static function capabilities( $request ) {
 		$capabilities = array(
-			'export'                => current_user_can( 'export' ),
-			'import'                => current_user_can( 'ai1wm_import_site' ),
+			'export'                => self::can_export(),
+			'import'                => self::can_import(),
 			'max_upload_size'       => wp_max_upload_size(),
 			'max_upload_size_human' => size_format( wp_max_upload_size() ),
 			'wordpress_version'     => get_bloginfo( 'version' ),
