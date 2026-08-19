@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tempus/featured-bottles",
+	"title": "Tempus — Featured Bottles",
+	"description": "WooCommerce product grid — tagged Featured or a hand-picked set.",
+	"category": "tempus",
+	"icon": "store",
+	"keywords": [ "tempus", "products", "featured", "cellar" ],
+	"textdomain": "tempus-core",
+	"acf": {
+		"mode": "preview",
+		"renderTemplate": "render.php"
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "full" ]
+	}
+}

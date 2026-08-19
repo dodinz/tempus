@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tempus/rituals",
+	"title": "Tempus — Rituals",
+	"description": "Curated bundle cards (whisky + cigar + vinyl), from WooCommerce.",
+	"category": "tempus",
+	"icon": "products",
+	"keywords": [ "tempus", "rituals", "bundles" ],
+	"textdomain": "tempus-core",
+	"acf": {
+		"mode": "preview",
+		"renderTemplate": "render.php"
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "full" ]
+	}
+}

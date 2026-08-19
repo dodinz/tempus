@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tempus/membership",
+	"title": "Tempus — Membership",
+	"description": "Founding-members waitlist capture beside membership tier cards.",
+	"category": "tempus",
+	"icon": "groups",
+	"keywords": [ "tempus", "membership", "tiers", "waitlist" ],
+	"textdomain": "tempus-core",
+	"acf": {
+		"mode": "preview",
+		"renderTemplate": "render.php"
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "full" ]
+	}
+}

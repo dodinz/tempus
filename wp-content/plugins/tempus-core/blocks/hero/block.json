@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tempus/hero",
+	"title": "Tempus — Hero",
+	"description": "Full-bleed hero with kicker, title, lead and two CTAs.",
+	"category": "tempus",
+	"icon": "cover-image",
+	"keywords": [ "tempus", "hero", "banner" ],
+	"textdomain": "tempus-core",
+	"acf": {
+		"mode": "preview",
+		"renderTemplate": "render.php"
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "full" ]
+	}
+}

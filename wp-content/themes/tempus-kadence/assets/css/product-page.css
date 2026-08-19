@@ -1,0 +1,622 @@
+/* =========================================================
+   TEMPUS — Single Product Page Styling
+
+   WHERE THIS GOES: save as
+       kadence-child/assets/css/product-page.css
+   and enqueue it from the child theme's functions.php:
+
+       add_action( 'wp_enqueue_scripts', function() {
+           if ( function_exists( 'is_product' ) && is_product() ) {
+               wp_enqueue_style(
+                   'tempus-product-page',
+                   get_stylesheet_directory_uri() . '/assets/css/product-page.css',
+                   array( 'tempus-tokens' ),   // <- your tokens.css handle
+                   '1.0'
+               );
+           }
+       }, 20 );
+
+   Change 'tempus-tokens' to whatever handle you registered tokens.css
+   under. That dependency is what guarantees tokens.css loads first.
+
+   ---------------------------------------------------------
+   MAPPING LAYER
+   Every value below reads from your existing tokens.css first and only
+   falls back to the hex if that token doesn't exist. Open tokens.css,
+   check the variable names, and correct any that don't match — then the
+   product page tracks the homepage automatically forever after.
+   ========================================================= */
+
+:root {
+	--t-bg:        var(--near-black,        #0F0A07);  /* near-black brown   */
+	--t-panel:     var(--espresso,          #1A120C);  /* cards, ritual box  */
+	--t-line:      var(--border-gold,       rgba(200, 151, 63, .16));
+	--t-gold:      var(--gold-tempus,       #C8973F);  /* buttons, price     */
+	--t-gold-soft: var(--gold-deep,         #E0B45F);  /* hover              */
+	--t-cream:     var(--white,             #F3EADC);  /* headings, body     */
+	--t-muted:     var(--on-surface-variant, #A2907A); /* labels, old price  */
+	--t-green:     #6FA96B;                            /* in-stock dot       */
+
+	/* Licensed brand faces — self-hosted, no substitution.
+	   Serif carries the product name and tasting prose; the condensed
+	   sans carries every uppercase label, spec, and button. */
+	--t-serif: "Cormorant Garamond", Georgia, serif;
+	--t-sans:  "Proxima Nova Condensed", "Proxima Nova", system-ui, sans-serif;
+}
+
+
+/* ---------------------------------------------------------
+   PAGE SHELL
+   --------------------------------------------------------- */
+.single-product .site-content,
+.single-product .content-area,
+.single-product .entry-content {
+	background: var(--t-bg);
+	color: var(--t-cream);
+}
+
+/* Kill the theme's page title bar and breadcrumbs on products */
+.single-product .entry-hero-container-inner,
+.single-product .woocommerce-breadcrumb,
+.single-product .product_meta,
+.single-product .woocommerce-product-rating {
+	display: none !important;
+}
+
+/* Woo's default green "Sale!" flash — the design uses the Save badge instead */
+.single-product .woocommerce-product-gallery .onsale {
+	display: none;
+}
+
+
+/* ---------------------------------------------------------
+   1. HERO — image left, details right, ambient background
+   --------------------------------------------------------- */
+.single-product div.product {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+	gap: clamp(2rem, 5vw, 5rem);
+	align-items: center;
+	padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 4vw, 4rem);
+	background-color: #120C08;
+	background-image:
+		linear-gradient(105deg, rgba(15, 10, 7, .94) 35%, rgba(15, 10, 7, .55) 100%),
+		var(--tempus-hero-image, none);
+	background-size: cover;
+	background-position: center;
+	border: 1px solid var(--t-line);
+	border-radius: 2px;
+}
+
+.single-product .woocommerce-product-gallery,
+.single-product .summary.entry-summary {
+	width: 100% !important;
+	float: none !important;
+	margin: 0 !important;
+}
+
+.single-product .woocommerce-product-gallery img {
+	border-radius: 2px;
+}
+
+/* Eyebrow — reused in several places */
+.tempus-eyebrow {
+	font-family: var(--t-sans);
+	font-size: .72rem;
+	font-weight: 600;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	margin: 0 0 .9rem;
+}
+
+.single-product .product_title {
+	font-family: var(--t-serif);
+	font-size: clamp(2.75rem, 6vw, 5rem);
+	font-weight: 500;
+	line-height: .95;
+	letter-spacing: -.01em;
+	color: var(--t-cream);
+	margin: 0 0 1.5rem;
+}
+
+.single-product .woocommerce-product-details__short-description {
+	font-family: var(--t-serif);
+	font-size: 1.2rem;          /* Cormorant runs small — sized up to compensate */
+	line-height: 1.65;
+	color: rgba(243, 234, 220, .78);
+	max-width: 32em;
+	margin-bottom: 2rem;
+}
+
+/* --- Price row --- */
+.single-product .summary > .price {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: .85rem;
+	margin: 0 0 2rem;
+	font-family: var(--t-serif);
+}
+
+.single-product .summary > .price ins {
+	order: 1;
+	text-decoration: none;
+	font-size: 2.6rem;
+	color: var(--t-gold);
+}
+
+.single-product .summary > .price del {
+	order: 2;
+	font-size: 1.15rem;
+	color: var(--t-muted);
+	opacity: 1;
+}
+
+.single-product .summary > .price > .amount {   /* non-sale products */
+	font-size: 2.6rem;
+	color: var(--t-gold);
+}
+
+.tempus-save {
+	order: 3;
+	font-family: var(--t-sans);
+	font-size: .68rem;
+	font-weight: 700;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: #9BD08F;
+	background: rgba(111, 169, 107, .14);
+	border: 1px solid rgba(111, 169, 107, .35);
+	border-radius: 2px;
+	padding: .35rem .6rem;
+	white-space: nowrap;
+}
+
+/* --- Quantity + Add to cart row --- */
+.single-product form.cart {
+	display: flex;
+	align-items: stretch;
+	gap: 1rem;
+	margin: 0 0 1rem;
+}
+
+.single-product form.cart .quantity {
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--t-line);
+	border-radius: 2px;
+	background: rgba(0, 0, 0, .3);
+	min-width: 150px;
+}
+
+.single-product form.cart .quantity input[type="number"],
+.single-product form.cart .quantity .qty {
+	background: transparent;
+	border: 0;
+	color: var(--t-cream);
+	text-align: center;
+	font-family: var(--t-sans);
+	font-size: 1rem;
+	width: 100%;
+	box-shadow: none;
+}
+
+/* Kadence's built-in +/- buttons */
+.single-product form.cart .kadence-quantity-button,
+.single-product form.cart .quantity .minus,
+.single-product form.cart .quantity .plus {
+	background: transparent;
+	border: 0;
+	color: var(--t-muted);
+	font-size: 1.2rem;
+	padding: 0 1rem;
+	cursor: pointer;
+	transition: color .2s ease;
+}
+.single-product form.cart .kadence-quantity-button:hover,
+.single-product form.cart .quantity .minus:hover,
+.single-product form.cart .quantity .plus:hover {
+	color: var(--t-gold);
+	background: transparent;
+}
+
+.single-product form.cart button.single_add_to_cart_button {
+	flex: 1;
+	min-width: 220px;
+	background: var(--t-gold);
+	color: #191007;
+	font-family: var(--t-sans);
+	font-size: .78rem;
+	font-weight: 700;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	border: 0;
+	border-radius: 2px;
+	padding: 1.15rem 2rem;
+	transition: background .25s ease, transform .25s ease;
+}
+.single-product form.cart button.single_add_to_cart_button:hover {
+	background: var(--t-gold-soft);
+	transform: translateY(-1px);
+}
+
+/* --- Stock line --- */
+.tempus-stock {
+	display: flex;
+	align-items: center;
+	gap: .55rem;
+	font-family: var(--t-sans);
+	font-size: .7rem;
+	font-weight: 600;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+	margin: 0;
+}
+.tempus-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--t-green);
+	box-shadow: 0 0 8px rgba(111, 169, 107, .8);
+}
+.tempus-stock.is-out .tempus-dot {
+	background: #9A6B4F;
+	box-shadow: none;
+}
+
+
+/* ---------------------------------------------------------
+   2. SPEC BAR
+   --------------------------------------------------------- */
+.tempus-specbar {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	border-top: 1px solid var(--t-line);
+	border-bottom: 1px solid var(--t-line);
+	background: rgba(0, 0, 0, .25);
+}
+
+.tempus-spec {
+	padding: 1.6rem clamp(1rem, 2.5vw, 2.25rem);
+	border-right: 1px solid var(--t-line);
+}
+.tempus-spec:last-child {
+	border-right: 0;
+}
+
+.tempus-spec-label {
+	display: block;
+	font-family: var(--t-sans);
+	font-size: .66rem;
+	font-weight: 600;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+	margin-bottom: .5rem;
+}
+
+.tempus-spec-value {
+	display: block;
+	font-family: var(--t-sans);
+	font-size: 1rem;
+	color: var(--t-cream);
+}
+
+
+/* ---------------------------------------------------------
+   3. TASTING NOTES + RITUAL
+   --------------------------------------------------------- */
+.tempus-story {
+	padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 4vw, 4rem);
+}
+
+.tempus-story-inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: clamp(2rem, 5vw, 5rem);
+	align-items: start;
+}
+
+.tempus-notes-title {
+	font-family: var(--t-serif);
+	font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+	font-weight: 500;
+	color: var(--t-cream);
+	margin: 0 0 1.5rem;
+}
+
+.tempus-notes-body p {
+	font-family: var(--t-serif);
+	font-size: 1.18rem;         /* Cormorant runs small — sized up to compensate */
+	line-height: 1.8;
+	color: rgba(243, 234, 220, .74);
+	max-width: 40em;
+}
+
+.tempus-trust {
+	display: flex;
+	gap: 2.25rem;
+	list-style: none;
+	margin: 2.5rem 0 0;
+	padding: 2rem 0 0;
+	border-top: 1px solid var(--t-line);
+}
+.tempus-trust li {
+	font-family: var(--t-sans);
+	font-size: .68rem;
+	font-weight: 600;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+}
+.tempus-trust li::before {
+	margin-right: .5rem;
+	color: var(--t-gold);
+}
+.tempus-trust-lock::before  { content: "\1F512"; }
+.tempus-trust-check::before { content: "\2713"; }
+
+/* --- Ritual card --- */
+.tempus-ritual {
+	background: var(--t-panel);
+	border: 1px solid var(--t-line);
+	border-radius: 3px;
+	padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.tempus-ritual-items {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 2rem;
+}
+
+.tempus-ritual-item {
+	flex: 1;
+	margin: 0;
+	text-align: center;
+}
+.tempus-ritual-item img {
+	width: 100%;
+	aspect-ratio: 3 / 4;
+	object-fit: cover;
+	border: 1px solid var(--t-line);
+	border-radius: 2px;
+	display: block;
+}
+.tempus-ritual-item figcaption {
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+	margin-top: .75rem;
+}
+
+.tempus-plus {
+	color: var(--t-gold);
+	font-size: 1.15rem;
+	flex: 0 0 auto;
+}
+
+.tempus-ritual-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.tempus-ritual-price,
+.tempus-ritual-price .amount {
+	font-family: var(--t-serif);
+	font-size: 1.85rem;
+	color: var(--t-gold);
+}
+
+.tempus-ritual-btn {
+	font-family: var(--t-sans);
+	font-size: .68rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	border: 1px solid var(--t-gold);
+	border-radius: 2px;
+	padding: .8rem 1.5rem;
+	text-decoration: none;
+	transition: background .25s ease, color .25s ease;
+}
+.tempus-ritual-btn:hover {
+	background: var(--t-gold);
+	color: #191007;
+}
+
+
+/* ---------------------------------------------------------
+   4. RELATED PRODUCTS — "You May Also Savor"
+   --------------------------------------------------------- */
+.tempus-related {
+	position: relative;
+	padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 4rem) clamp(4rem, 8vw, 6rem);
+}
+
+.tempus-related .related > h2,
+.tempus-related .up-sells > h2 {
+	font-family: var(--t-serif);
+	font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+	font-weight: 500;
+	color: var(--t-cream);
+	margin: 0 0 2.5rem;
+}
+
+.tempus-viewall {
+	position: absolute;
+	top: clamp(2.6rem, 5.6vw, 4.6rem);
+	right: clamp(1.25rem, 4vw, 4rem);
+	font-family: var(--t-sans);
+	font-size: .68rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	text-decoration: none;
+}
+.tempus-viewall:hover { color: var(--t-gold-soft); }
+
+/* --- Product cards --- */
+.tempus-related ul.products li.product,
+.woocommerce ul.products li.product {
+	position: relative;
+	background: var(--t-panel);
+	border: 1px solid var(--t-line);
+	border-radius: 3px;
+	overflow: hidden;
+	text-align: left;
+	transition: transform .3s ease, border-color .3s ease;
+}
+.woocommerce ul.products li.product:hover {
+	transform: translateY(-4px);
+	border-color: rgba(200, 151, 63, .4);
+}
+
+.woocommerce ul.products li.product a img {
+	margin: 0;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title,
+.woocommerce ul.products li.product .tempus-card-eyebrow,
+.woocommerce ul.products li.product .tempus-card-meta,
+.woocommerce ul.products li.product .price,
+.woocommerce ul.products li.product .button {
+	margin-left: 1.5rem;
+	margin-right: 1.5rem;
+}
+
+.tempus-card-eyebrow {
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	margin-top: 1.5rem !important;
+	margin-bottom: .5rem !important;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+	font-family: var(--t-serif) !important;
+	font-size: 1.5rem !important;
+	font-weight: 500;
+	color: var(--t-cream);
+	padding: 0 !important;
+	margin-bottom: .4rem !important;
+}
+
+.tempus-card-meta {
+	font-family: var(--t-sans);
+	font-size: .8rem;
+	color: var(--t-muted);
+	margin-bottom: 1rem !important;
+}
+
+.woocommerce ul.products li.product .price {
+	display: block;
+	font-family: var(--t-serif);
+	font-size: 1.45rem;
+	color: var(--t-gold);
+	margin-bottom: 1.5rem !important;
+}
+
+.woocommerce ul.products li.product .button,
+.woocommerce ul.products li.product .add_to_cart_button {
+	display: inline-block;
+	font-family: var(--t-sans);
+	font-size: .64rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	background: transparent;
+	border: 1px solid var(--t-gold);
+	border-radius: 2px;
+	padding: .75rem 1.35rem;
+	margin-bottom: 1.5rem !important;
+}
+.woocommerce ul.products li.product .button:hover {
+	background: var(--t-gold);
+	color: #191007;
+}
+
+.tempus-limited {
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+	z-index: 3;
+	font-family: var(--t-sans);
+	font-size: .6rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: #191007;
+	background: var(--t-gold);
+	padding: .35rem .65rem;
+	border-radius: 2px;
+}
+
+/* Hide Woo's default round "Sale!" bubble on cards */
+.woocommerce ul.products li.product .onsale {
+	display: none;
+}
+
+
+/* ---------------------------------------------------------
+   5. MOBILE
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+	.single-product div.product,
+	.tempus-story-inner {
+		grid-template-columns: 1fr;
+	}
+
+	.tempus-spec {
+		border-right: 0;
+		border-bottom: 1px solid var(--t-line);
+	}
+
+	.single-product form.cart {
+		flex-wrap: wrap;
+	}
+	.single-product form.cart button.single_add_to_cart_button {
+		width: 100%;
+	}
+
+	.tempus-viewall {
+		position: static;
+		display: inline-block;
+		margin-bottom: 2rem;
+	}
+}
+
+
+/* ---------------------------------------------------------
+   6. ACCESSIBILITY
+   --------------------------------------------------------- */
+.single-product a:focus-visible,
+.single-product button:focus-visible {
+	outline: 2px solid var(--t-gold-soft);
+	outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.woocommerce ul.products li.product,
+	.single-product form.cart button.single_add_to_cart_button {
+		transition: none;
+	}
+}

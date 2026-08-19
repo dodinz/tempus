@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tempus/pursuits",
+	"title": "Tempus — Three Pursuits",
+	"description": "Whisky / Cigar / Vinyl columns with a shared heading.",
+	"category": "tempus",
+	"icon": "screenoptions",
+	"keywords": [ "tempus", "pursuits", "columns" ],
+	"textdomain": "tempus-core",
+	"acf": {
+		"mode": "preview",
+		"renderTemplate": "render.php"
+	},
+	"supports": {
+		"anchor": true,
+		"align": [ "full" ]
+	}
+}
