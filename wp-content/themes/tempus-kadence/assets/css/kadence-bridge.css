@@ -190,10 +190,13 @@ input:focus, textarea:focus, select:focus {
 }
 ::placeholder { color: var(--ink-faint); }
 
+/* Styles for single post content (h1–h6) to remove default margins */
 .single-content h1, .single-content h2, .single-content h3, .single-content h4, .single-content h5, .single-content h6 {
   margin:0;
 }
-
+/* ============================================================
+   HERO CTA (Kadence hero block) - Overriding buttons padding
+   ============================================================ */
 .tz-hero__cta .tz-btn--lg {
   padding: 0 45px;
   font-size: 14px;
