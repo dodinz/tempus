@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Copy-Item \"wp-content\\\\themes\\\\tempus\\\\inc\\\\acf-fields.php\" \"wp-content\\\\plugins\\\\tempus-core\\\\includes\\\\acf-fields.php\")",
+      "Bash(php -l wp-content/plugins/tempus-core/tempus-core.php)",
+      "Bash(php -l wp-content/plugins/tempus-core/includes/helpers.php)",
+      "Bash(php -l wp-content/plugins/tempus-core/includes/taxonomy.php)",
+      "Bash(php -l wp-content/plugins/tempus-core/includes/woocommerce.php)",
+      "Bash(wp --info)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://tempus.local/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:10003/)",
+      "Bash(grep -o \"className:le[^}]\\\\{0,200\\\\}\" \"D:/work/develop/tempus/app/public/wp-content/plugins/kadence-blocks/dist/blocks-rowlayout.js\")",
+      "Bash(grep -o \"function Kr\\([^\\)]*\\)[^}]\\\\{0,150\\\\}\" \"D:/work/develop/tempus/app/public/wp-content/plugins/kadence-blocks/dist/blocks-rowlayout.js\")",
+      "Bash(grep -o \"Kr=[a-zA-Z\\(][^;]\\\\{0,150\\\\}\" \"D:/work/develop/tempus/app/public/wp-content/plugins/kadence-blocks/dist/blocks-rowlayout.js\")",
+      "Bash(grep -o \"registerBlockType\\([\\\\\"']kadence/rowlayout[\\\\\"'][^\\)]\\\\{0,50\\\\}\" \"D:/work/develop/tempus/app/public/wp-content/plugins/kadence-blocks/dist/blocks-rowlayout.js\")",
+      "Bash(grep -o \"\\\\\"kadence/rowlayout\\\\\"[^;]\\\\{0,300\\\\}\" \"D:/work/develop/tempus/app/public/wp-content/plugins/kadence-blocks/dist/blocks-rowlayout.js\")",
+      "Bash(where mysql *)",
+      "Bash(ls -la \"/c/Users/dindo/wp-cli/\" 2>&1)",
+      "Bash(php \"/c/Users/dindo/wp-cli/wp-cli.phar\" term list product_tag --fields=term_id,name,slug --format=table)",
+      "Bash(curl -s \"http://tempus.local/wp-json/wc/store/v1/products/tags?search=featured\")",
+      "Bash(curl -s \"http://tempus.local/wp-json/wp/v2/product_tag?slug=featured\")",
+      "Bash(curl -s \"http://tempus.local/wp-json/wp/v2/product_cat?slug=ritual-bundles\")",
+      "Bash(php -l wp-content/plugins/tempus-core/includes/homepage-pattern.php)",
+      "Bash(php \"/c/Users/dindo/wp-cli/wp-cli.phar\" eval \"echo 'DB OK: ' . \\(defined\\('ABSPATH'\\) ? 'yes' : 'no'\\);\")",
+      "Bash(php -v)",
+      "Read(//c/Users/dindo/AppData/Local/Programs/Local/resources/extraResources/bin/wp-cli/win32/**)",
+      "Read(//c/Users/dindo/AppData/Local/Programs/Local/resources/extraResources/bin/wp-cli/**)",
+      "Read(//c/Users/dindo/AppData/Roaming/Local/lightning-services/php-8.4.4\\\\+2/bin/win64/ext/**)"
+    ]
+  }
+}

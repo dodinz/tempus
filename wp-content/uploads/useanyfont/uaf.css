@@ -1,0 +1,10 @@
+				@font-face {
+					font-family: 'maharlika-regular';
+					src: url('/wp-content/uploads/useanyfont/2270Maharlika-Regular.woff2') format('woff2'),
+						url('/wp-content/uploads/useanyfont/2270Maharlika-Regular.woff') format('woff');
+					  font-display: auto;
+				}
+
+				.maharlika-regular{font-family: 'maharlika-regular' !important;}
+
+		
