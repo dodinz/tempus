@@ -77,30 +77,39 @@ $reveal = 'tz-reveal' . ( ! empty( $is_preview ) ? ' is-visible' : '' );
 					$pid   = $product->get_id();
 					$badge = function_exists( 'tempus_product_badge' ) ? tempus_product_badge( $product ) : '';
 					$cats  = wc_get_product_category_list( $pid );
+					$link  = get_permalink( $pid );
+
+					// Meta line: bottle_meta ACF field, else pa_origin · pa_abv attributes.
+					$meta = function_exists( 'get_field' ) ? get_field( 'bottle_meta', $pid ) : '';
+					if ( empty( $meta ) ) {
+						$parts = array_filter( array(
+							$product->get_attribute( 'pa_origin' ),
+							$product->get_attribute( 'pa_abv' ),
+						) );
+						$meta = implode( ' · ', $parts );
+					}
 					?>
-					<a class="tz-card <?php echo esc_attr( $reveal ); ?>" href="<?php echo esc_url( get_permalink( $pid ) ); ?>">
-						<div class="tz-card__media">
+					<div class="tz-card <?php echo esc_attr( $reveal ); ?>">
+						<a class="tz-card__media" href="<?php echo esc_url( $link ); ?>">
 							<?php if ( $badge ) : ?><div class="tz-card__badge"><?php echo wp_kses_post( $badge ); ?></div><?php endif; ?>
-							<?php echo $product->get_image( 'woocommerce_thumbnail' ); ?>
-						</div>
+							<?php echo $product->get_image('full'); ?>
+						</a>
 						<div class="tz-card__body">
 							<span class="tz-card__cat"><?php echo wp_kses_post( wp_strip_all_tags( $cats ) ); ?></span>
-							<h3 class="tz-card__name"><?php echo esc_html( $product->get_name() ); ?></h3>
-							<p class="tz-card__meta"><?php echo esc_html( wp_trim_words( $product->get_short_description(), 12 ) ); ?></p>
+							<h3 class="tz-card__name"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
+							<?php if ( $meta ) : ?><p class="tz-card__meta"><?php echo esc_html( $meta ); ?></p><?php endif; ?>
 							<div class="tz-card__foot">
-								<span class="tz-card__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
-								<span class="tz-btn tz-btn--secondary tz-btn--sm">View</span>
+								<div class="tz-card__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
+								<div class="tz-card__actions">
+									<a class="tz-btn tz-btn--sm tz-card__cart" href="<?php echo esc_url( $product->add_to_cart_url() ); ?>">Add to Cart</a>
+								</div>
 							</div>
 						</div>
-					</a>
+					</div>
 				<?php endforeach; ?>
 			</div>
 		<?php else : ?>
 			<p style="text-align:center;color:var(--ink-faint)">Add products and tag them &ldquo;Featured&rdquo; to populate this section.</p>
 		<?php endif; ?>
-
-		<div style="text-align:center;margin-top:44px">
-			<a class="tz-btn tz-btn--secondary tz-btn--lg" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>">View All Products</a>
-		</div>
 	</div>
 </section>
