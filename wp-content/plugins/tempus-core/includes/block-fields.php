@@ -234,7 +234,7 @@ function tempus_register_block_field_groups() {
 			array(
 				'key' => 'field_member_form', 'label' => 'Waitlist form shortcode', 'name' => 'member_form',
 				'type' => 'text',
-				'instructions' => 'Paste the WPForms/CF7 shortcode for the Name/Email/Mobile waitlist form, e.g. [wpforms id="123"]. Leave blank to show the disabled placeholder form.',
+				'instructions' => 'Shortcode for the Name/Email/Mobile waitlist form. Use [tempus_waitlist_form] for the built-in Founding Members form. Leave blank to show the disabled placeholder form.',
 			),
 			array(
 				'key' => 'field_tiers', 'label' => 'Membership tiers', 'name' => 'tiers',

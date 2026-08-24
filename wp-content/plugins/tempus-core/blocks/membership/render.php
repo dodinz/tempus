@@ -53,7 +53,7 @@ $anchor = ! empty( $block['anchor'] ) ? $block['anchor'] : 'membership';
 			<?php if ( $form ) : ?>
 				<?php echo do_shortcode( $form ); ?>
 			<?php else : ?>
-				<!-- Static placeholder. Replace with a real WPForms/CF7 form via the
+				<!-- Static placeholder. Put [tempus_waitlist_form] in the
 				     "Waitlist form shortcode" field so submissions are stored + emailed. -->
 				<div class="tz-form">
 					<div class="tz-form__row">
@@ -73,7 +73,11 @@ $anchor = ! empty( $block['anchor'] ) ? $block['anchor'] : 'membership';
 				<?php foreach ( $tiers as $t ) :
 					$featured = ! empty( $t['featured'] );
 					?>
-					<div class="tz-tier<?php echo $featured ? ' tz-tier--featured' : ''; ?>">
+					<button type="button"
+						class="tz-tier tempus-tier<?php echo $featured ? ' tz-tier--featured' : ''; ?>"
+						data-tier="<?php echo esc_attr( sanitize_title( $t['name'] ) ); ?>"
+						data-tier-label="<?php echo esc_attr( $t['name'] ); ?>"
+						aria-pressed="false">
 						<div style="display:flex;flex-direction:column;gap:10px">
 							<div style="display:flex;align-items:center;gap:14px">
 								<span class="tz-tier__name"><?php echo esc_html( $t['name'] ); ?></span>
@@ -85,7 +89,7 @@ $anchor = ! empty( $block['anchor'] ) ? $block['anchor'] : 'membership';
 							<div class="tz-tier__price"><?php echo esc_html( $t['price'] ); ?></div>
 							<div class="tz-tier__cycle"><?php echo esc_html( $t['cycle'] ); ?></div>
 						</div>
-					</div>
+					</button>
 				<?php endforeach; ?>
 			</div>
 		</div>

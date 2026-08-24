@@ -1,0 +1,239 @@
+/**
+ * Tempus — Founding Members waitlist.
+ *
+ * Every custom property carries a literal fallback so the form renders in
+ * brand colours even if tokens.css is not loaded on a given page.
+ *
+ * Token names are reconciled against the child theme's tokens.css. The
+ * fallback literals are the original provisional approximations, not the
+ * brand values — they only apply if tokens.css is absent.
+ */
+
+/* -------------------------------------------------------------------------
+ * Layout
+ * ---------------------------------------------------------------------- */
+
+.tempus-waitlist__form {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+	align-items: start;
+}
+
+.tempus-waitlist__field--half { grid-column: span 1; }
+
+.tempus-waitlist__field--full,
+.tempus-waitlist__tier-readout { grid-column: 1 / -1; }
+
+/* Visually hidden, still announced. Do not swap for display:none. */
+.tempus-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Honeypot. Off-screen rather than display:none — some bots skip fields
+   that are explicitly hidden, which would defeat the trap. */
+.tempus-waitlist__hp {
+	position: absolute !important;
+	left: -9999px !important;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------
+ * Inputs
+ * ---------------------------------------------------------------------- */
+
+.tempus-waitlist input[type="text"],
+.tempus-waitlist input[type="email"],
+.tempus-waitlist input[type="tel"] {
+	width: 100%;
+	box-sizing: border-box;
+	background: var(--surface-container-low, #141210);
+	border: 1px solid var(--outline-variant, rgba(255, 255, 255, 0.12));
+	border-radius: 4px;
+	padding: 18px 20px;
+	color: var(--white, #F2EDE3);
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.95rem;
+	letter-spacing: 0.02em;
+	transition: border-color 0.2s ease;
+}
+
+.tempus-waitlist input::placeholder {
+	color: var(--ink-faint, #8E857A);
+	opacity: 1; /* Firefox dims placeholders by default. */
+}
+
+.tempus-waitlist input:focus {
+	outline: none;
+	border-color: var(--gold-tempus, #C9A227);
+}
+
+.tempus-waitlist input:focus-visible {
+	outline: 2px solid var(--gold-tempus, #C9A227);
+	outline-offset: 2px;
+}
+
+.tempus-waitlist input[aria-invalid="true"] {
+	border-color: #E0705F;
+}
+
+.tempus-waitlist__error {
+	margin: 6px 0 0;
+	color: #E0705F;
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.78rem;
+	letter-spacing: 0.02em;
+	min-height: 1em; /* Reserve space so the grid does not jump on error. */
+}
+
+/* -------------------------------------------------------------------------
+ * Submit
+ * ---------------------------------------------------------------------- */
+
+.tempus-waitlist__submit {
+	background: var(--gold-tempus, #C9A227);
+	border: none;
+	border-radius: 4px;
+	color: var(--near-black, #0B0A09);
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.82rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	padding: 20px 44px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.tempus-waitlist__submit:hover:not(:disabled) { background: #E0B92F; }
+
+.tempus-waitlist__submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.tempus-waitlist__submit:focus-visible {
+	outline: 2px solid var(--white, #F2EDE3);
+	outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------------------
+ * Status + consent
+ * ---------------------------------------------------------------------- */
+
+.tempus-waitlist__status:not(:empty) {
+	margin-top: 18px;
+	padding: 18px 20px;
+	border-radius: 4px;
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.9rem;
+	letter-spacing: 0.02em;
+}
+
+.tempus-waitlist__status.is-success {
+	background: rgba(201, 162, 39, 0.1);
+	border: 1px solid var(--gold-tempus, #C9A227);
+	color: var(--white, #F2EDE3);
+}
+
+.tempus-waitlist__status.is-error {
+	background: rgba(224, 112, 95, 0.08);
+	border: 1px solid #E0705F;
+	color: #E0705F;
+}
+
+.tempus-waitlist__consent {
+	margin-top: 16px;
+	color: var(--ink-faint, #8E857A);
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.75rem;
+	letter-spacing: 0.02em;
+}
+
+.tempus-waitlist__tier-readout {
+	margin: 0;
+	min-height: 1.2em; /* Reserve space so selecting a tier does not shift the button. */
+	color: var(--gold-tempus, #C9A227);
+	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
+	font-size: 0.75rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------------------
+ * Tier cards (rendered by the ACF repeater block)
+ * ---------------------------------------------------------------------- */
+
+.tempus-tier {
+	all: unset;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	cursor: pointer;
+	background: var(--surface-container-low, #141210);
+	border: 1px solid var(--outline-variant, rgba(255, 255, 255, 0.09));
+	border-radius: 6px;
+	padding: 26px 28px;
+	transition: border-color 0.2s ease;
+}
+
+/* The membership block ships its own .tz-tier card styling in the child
+   theme's main.css. This file is enqueued at shortcode render, so it prints
+   in the footer and its `all: unset` would otherwise beat that head-loaded
+   rule and flatten the card. Restore the layout the block expects; keep this
+   block ABOVE the hover/selected rules so those still win at equal
+   specificity. */
+.tz-tier.tempus-tier {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	padding: 26px 30px;
+	text-align: left;
+	background: var(--espresso, #1e1a15);
+	border: 1px solid var(--outline-variant, #2a2620);
+	border-radius: var(--radius-md, 6px);
+}
+
+.tz-tier--featured.tempus-tier {
+	border: 1.5px solid var(--gold-aged, #b8965a);
+	box-shadow: 0 0 0 1px rgba(239, 194, 95, .08);
+}
+
+.tempus-tier:hover { border-color: rgba(201, 162, 39, 0.4); }
+
+.tempus-tier.is-selected,
+.tempus-tier[aria-pressed="true"] {
+	border-color: var(--gold-tempus, #C9A227);
+}
+
+.tempus-tier:focus-visible {
+	outline: 2px solid var(--gold-tempus, #C9A227);
+	outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------------------
+ * Responsive
+ * ---------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+	.tempus-waitlist__form { grid-template-columns: 1fr; }
+	.tempus-waitlist__submit { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tempus-waitlist *,
+	.tempus-tier { transition: none !important; }
+}

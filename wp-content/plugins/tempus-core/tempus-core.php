@@ -46,6 +46,7 @@ if ( ! tempus_core_legacy_theme_active() ) {
 	require_once TEMPUS_CORE_DIR . 'includes/product-page.php';
 	require_once TEMPUS_CORE_DIR . 'includes/homepage-pattern.php';
 	require_once TEMPUS_CORE_DIR . 'includes/blocks.php';
+	require_once TEMPUS_CORE_DIR . 'includes/waitlist.php';
 }
 
 /**
