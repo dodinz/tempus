@@ -12,15 +12,19 @@
  *   5. Input sanitisation         (rest.php)
  *   6. Output escaping            (render.php, cpt.php)
  *   7. Capability check on admin  (cpt.php :: export handler)
+ *   8. Cloudflare Turnstile       (turnstile.php) — optional, see that file
+ *   9. Double opt-in confirmation (confirm.php)
  *
  * @package Tempus_Core
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TEMPUS_WAITLIST_VERSION', '1.0.0' );
+define( 'TEMPUS_WAITLIST_VERSION', '1.2.0' );
 
 require_once __DIR__ . '/waitlist/cpt.php';
+require_once __DIR__ . '/waitlist/turnstile.php';
+require_once __DIR__ . '/waitlist/mail.php';
+require_once __DIR__ . '/waitlist/confirm.php';
 require_once __DIR__ . '/waitlist/rest.php';
 require_once __DIR__ . '/waitlist/render.php';
-require_once __DIR__ . '/waitlist/mail.php';

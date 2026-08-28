@@ -31,21 +31,30 @@
 
 	var cards = document.querySelectorAll( '.tempus-tier' );
 
+	/**
+	 * Drop any tier selection — pressed state, highlight, hidden input and
+	 * readout. The cards are rendered by the membership block and live OUTSIDE
+	 * the <form>, so form.reset() cannot reach them.
+	 */
+	function clearTierSelection() {
+		Array.prototype.forEach.call( cards, function ( c ) {
+			c.classList.remove( 'is-selected' );
+			c.setAttribute( 'aria-pressed', 'false' );
+		} );
+		if ( tierInput ) { tierInput.value = ''; }
+		if ( readout ) { readout.textContent = ''; }
+	}
+
 	Array.prototype.forEach.call( cards, function ( card ) {
 		card.addEventListener( 'click', function () {
 
 			var alreadyOn = card.getAttribute( 'aria-pressed' ) === 'true';
 
-			Array.prototype.forEach.call( cards, function ( c ) {
-				c.classList.remove( 'is-selected' );
-				c.setAttribute( 'aria-pressed', 'false' );
-			} );
+			clearTierSelection();
 
 			// Clicking the selected card again clears it — otherwise there is
 			// no way to undo a misclick.
 			if ( alreadyOn ) {
-				if ( tierInput ) { tierInput.value = ''; }
-				if ( readout ) { readout.textContent = ''; }
 				return;
 			}
 
@@ -90,12 +99,41 @@
 		if ( first ) { first.focus(); }
 	}
 
+	/**
+	 * Reset the Turnstile widget.
+	 *
+	 * CRITICAL: a Turnstile token is SINGLE USE and expires after about five
+	 * minutes. If the first submit fails for any reason — a mistyped email,
+	 * a 500, a dropped connection — the token is already spent. Without this
+	 * reset the visitor's second attempt fails verification no matter what
+	 * they do, and the form looks permanently broken to them.
+	 */
+	function resetTurnstile() {
+		if ( window.turnstile && typeof window.turnstile.reset === 'function' ) {
+			try {
+				window.turnstile.reset();
+			} catch ( e ) {
+				// Widget not rendered yet — nothing to reset.
+			}
+		}
+	}
+
 	function setBusy( busy ) {
 		submit.disabled = busy;
 		wrap.classList.toggle( 'is-submitting', busy );
 		if ( label ) {
 			label.textContent = busy ? 'Joining…' : originalLabel;
 		}
+	}
+
+	/**
+	 * Return the form to a pristine state: fields, tier selection and any
+	 * lingering inline errors.
+	 */
+	function resetForm() {
+		form.reset();
+		clearTierSelection();
+		clearErrors();
 	}
 
 	form.addEventListener( 'submit', function ( event ) {
@@ -124,13 +162,27 @@
 				setBusy( false );
 
 				if ( result.body && result.body.success ) {
-					// Replace the form entirely — leaving it on screen invites
-					// a second submission and reads as "did that work?".
+					/*
+					 * Empty the fields, then replace the form entirely.
+					 *
+					 * The message stays put on purpose. Under double opt-in the
+					 * next step is in their inbox, and resubmitting issues a
+					 * fresh token that silently invalidates the link already
+					 * sent. Handing back an empty form reads as "that didn't
+					 * work" and invites exactly that.
+					 *
+					 * No resetTurnstile() here — this token was spent
+					 * successfully and the form is going away.
+					 */
+					resetForm();
 					form.hidden = true;
 					status.className = 'tempus-waitlist__status is-success';
 					status.textContent = result.body.message;
 					return;
 				}
+
+				// Any non-success path burns the token. Always reset.
+				resetTurnstile();
 
 				if ( result.body && result.body.errors ) {
 					showErrors( result.body.errors );
@@ -143,6 +195,7 @@
 			} )
 			.catch( function () {
 				setBusy( false );
+				resetTurnstile();
 				status.className = 'tempus-waitlist__status is-error';
 				status.textContent = 'Could not reach the server. Please check your connection and try again.';
 			} );

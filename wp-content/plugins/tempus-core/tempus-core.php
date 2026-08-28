@@ -71,6 +71,15 @@ add_action( 'before_woocommerce_init', function () {
 	}
 } );
 
+/**
+ * Point waitlist confirmation links at the dedicated landing page rather than
+ * the homepage. That page must carry the [tempus_waitlist_confirmation]
+ * shortcode, or the click will confirm silently with no visible outcome.
+ */
+add_filter( 'tempus_waitlist_confirm_page', function () {
+	return home_url( '/waitlist-confirmed/' );
+} );
+
 add_filter( 'kadence_blocks_google_fonts_array', 'tempus_register_custom_fonts' );
 add_filter( 'kadence_theme_google_fonts_array', 'tempus_register_custom_fonts' );
 

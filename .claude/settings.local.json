@@ -27,7 +27,11 @@
       "Bash(php -v)",
       "Read(//c/Users/dindo/AppData/Local/Programs/Local/resources/extraResources/bin/wp-cli/win32/**)",
       "Read(//c/Users/dindo/AppData/Local/Programs/Local/resources/extraResources/bin/wp-cli/**)",
-      "Read(//c/Users/dindo/AppData/Roaming/Local/lightning-services/php-8.4.4\\\\+2/bin/win64/ext/**)"
+      "Read(//c/Users/dindo/AppData/Roaming/Local/lightning-services/php-8.4.4\\\\+2/bin/win64/ext/**)",
+      "Bash(sed -i -e s/--tempus-gold,/--gold-tempus,/g -e s/--tempus-cream,/--white,/g -e s/--tempus-muted,/--ink-faint,/g -e s/--tempus-surface,/--surface-container-low,/g -e s/--tempus-border,/--outline-variant,/g -e s/--tempus-black,/--near-black,/g -e s/--tempus-font-sans,/--font-ui,/g waitlist.css)",
+      "Bash(python -)",
+      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \"braces open=\"o\" close=\"c}' waitlist.css)",
+      "Bash(node --check waitlist.js)"
     ]
   }
 }

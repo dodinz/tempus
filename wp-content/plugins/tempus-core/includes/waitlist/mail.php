@@ -53,6 +53,45 @@ function tempus_waitlist_send_admin_notification( array $data, $post_id ) {
 }
 
 /**
+ * Ask the subscriber to confirm their address.
+ *
+ * This is the double opt-in step. Until they click, the entry stays pending
+ * and never reaches your export.
+ *
+ * @param array  $data Sanitised submission data.
+ * @param string $url  Confirmation URL.
+ * @return void
+ */
+function tempus_waitlist_send_confirmation( array $data, $url ) {
+
+	$subject = (string) apply_filters(
+		'tempus_waitlist_confirm_subject',
+		__( 'Confirm your place at TEMPUS', 'tempus' )
+	);
+
+	$greeting = $data['name']
+		? sprintf( /* translators: %s: subscriber first name */ __( 'Dear %s,', 'tempus' ), explode( ' ', $data['name'] )[0] )
+		: __( 'Hello,', 'tempus' );
+
+	$body = implode( "\n\n", [
+		$greeting,
+		__( 'One last step. Confirm your email address and your place on the founding members waitlist is held:', 'tempus' ),
+		$url,
+		sprintf(
+			/* translators: %d: number of days */
+			__( 'This link is valid for %d days. If you did not request this, simply ignore this email — nothing will be kept.', 'tempus' ),
+			TEMPUS_CONFIRM_TTL_DAYS
+		),
+		'—',
+		get_bloginfo( 'name' ),
+	] );
+
+	$body = (string) apply_filters( 'tempus_waitlist_confirm_body', $body, $data, $url );
+
+	wp_mail( $data['email'], $subject, $body );
+}
+
+/**
  * Send the subscriber a confirmation.
  *
  * @param array $data Sanitised submission data.

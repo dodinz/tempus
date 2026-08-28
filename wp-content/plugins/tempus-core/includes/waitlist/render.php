@@ -35,10 +35,29 @@ add_action( 'wp_enqueue_scripts', function () {
 		true
 	);
 
+	wp_register_script(
+		'cloudflare-turnstile',
+		'https://challenges.cloudflare.com/turnstile/v0/api.js',
+		[],
+		null,
+		true
+	);
+
 	wp_localize_script( 'tempus-waitlist', 'TempusWaitlist', [
-		'endpoint' => esc_url_raw( rest_url( 'tempus/v1/waitlist' ) ),
+		'endpoint'  => esc_url_raw( rest_url( 'tempus/v1/waitlist' ) ),
+		'turnstile' => tempus_turnstile_enabled(),
 	] );
 } );
+
+/**
+ * Turnstile's script must load with async and defer.
+ */
+add_filter( 'script_loader_tag', function ( $tag, $handle ) {
+	if ( 'cloudflare-turnstile' !== $handle ) {
+		return $tag;
+	}
+	return str_replace( ' src=', ' async defer src=', $tag );
+}, 10, 2 );
 
 /**
  * Render the form.
@@ -55,6 +74,10 @@ function tempus_waitlist_form_shortcode( $atts = [] ) {
 
 	wp_enqueue_style( 'tempus-waitlist' );
 	wp_enqueue_script( 'tempus-waitlist' );
+
+	if ( tempus_turnstile_enabled() ) {
+		wp_enqueue_script( 'cloudflare-turnstile' );
+	}
 
 	$ts    = (string) time();
 	$token = tempus_waitlist_token( $ts );
@@ -117,6 +140,25 @@ function tempus_waitlist_form_shortcode( $atts = [] ) {
 			</div>
 
 			<p class="tempus-waitlist__tier-readout" data-tempus-tier-readout></p>
+
+			<?php if ( tempus_turnstile_enabled() ) : ?>
+				<?php
+				/*
+				 * The widget injects a hidden input named cf-turnstile-response
+				 * into this form, which FormData picks up automatically.
+				 *
+				 * theme="dark" matches the section background. Swap
+				 * data-size to "flexible" if the default width crowds the
+				 * two-column grid.
+				 */
+				?>
+				<div class="tempus-waitlist__field tempus-waitlist__field--full">
+					<div class="cf-turnstile"
+					     data-sitekey="<?php echo esc_attr( TEMPUS_TURNSTILE_SITEKEY ); ?>"
+					     data-theme="dark"
+					     data-appearance="interaction-only"></div>
+				</div>
+			<?php endif; ?>
 
 			<div class="tempus-waitlist__field tempus-waitlist__field--full">
 				<button type="submit" class="tempus-waitlist__submit">

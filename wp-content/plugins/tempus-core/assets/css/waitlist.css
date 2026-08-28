@@ -20,6 +20,11 @@
 	align-items: start;
 }
 
+/* The rule above is an author declaration on a class, so it outranks the UA
+   stylesheet's `[hidden] { display: none }`. Without this, setting
+   form.hidden in JS has no visual effect at all. */
+.tempus-waitlist__form[hidden] { display: none; }
+
 .tempus-waitlist__field--half { grid-column: span 1; }
 
 .tempus-waitlist__field--full,
@@ -155,7 +160,7 @@
 }
 
 .tempus-waitlist__consent {
-	margin-top: 16px;
+	margin-top: 20px;
 	color: var(--ink-faint, #8E857A);
 	font-family: var(--font-ui, "Proxima Nova Condensed", system-ui, sans-serif);
 	font-size: 0.75rem;
@@ -170,6 +175,22 @@
 	font-size: 0.75rem;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------------------
+ * Turnstile
+ *
+ * With data-appearance="interaction-only" the widget renders nothing at all
+ * unless Cloudflare decides a challenge is warranted — so this collapses to
+ * zero height for virtually every visitor.
+ * ---------------------------------------------------------------------- */
+
+.tempus-waitlist .cf-turnstile:not(:empty) {
+	margin-bottom: 4px;
+}
+
+.tempus-waitlist .cf-turnstile iframe {
+	max-width: 100%;
 }
 
 /* -------------------------------------------------------------------------

@@ -201,3 +201,7 @@ input:focus, textarea:focus, select:focus {
   padding: 0 45px;
   font-size: 14px;
 }
+
+.wp-block-search .wp-block-search__input {
+  border-color: var(--outline-variant);
+}

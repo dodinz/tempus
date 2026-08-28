@@ -34,6 +34,8 @@ add_action( 'rest_api_init', function () {
 			'ts'     => [ 'required' => true,  'type' => 'string' ],
 			// Honeypot. Named to look tempting to a bot, must arrive empty.
 			'website' => [ 'required' => false, 'type' => 'string' ],
+			// Injected into the form by the Turnstile widget script.
+			'cf-turnstile-response' => [ 'required' => false, 'type' => 'string' ],
 		],
 	] );
 } );
@@ -148,12 +150,29 @@ function tempus_waitlist_handle_submission( WP_REST_Request $request ) {
 		return $silent;
 	}
 
-	// 4. Rate limit.
+	// 4. Rate limit. Deliberately BEFORE Turnstile so a flood cannot make us
+	//    hammer Cloudflare's API on the attacker's behalf.
 	if ( tempus_waitlist_rate_limited() ) {
 		return new WP_REST_Response( [
 			'success' => false,
 			'message' => __( 'Too many attempts. Please try again later.', 'tempus' ),
 		], 429 );
+	}
+
+	/*
+	 * 5. Turnstile.
+	 *
+	 * NOT silent. A genuine visitor can fail this — most commonly because the
+	 * token expired while they were filling the form. Silently pretending to
+	 * succeed would lose a real signup and they would never know. Tell them,
+	 * and let the client reset the widget so they can retry.
+	 */
+	if ( ! tempus_turnstile_verify( $request->get_param( 'cf-turnstile-response' ) ) ) {
+		return new WP_REST_Response( [
+			'success'        => false,
+			'reset_turnstile' => true,
+			'message'        => __( 'Verification failed. Please try again.', 'tempus' ),
+		], 403 );
 	}
 
 	/*
@@ -221,12 +240,25 @@ function tempus_waitlist_handle_submission( WP_REST_Request $request ) {
 		], 500 );
 	}
 
-	// Mail failures must never cost us the signup — the row is already saved.
-	tempus_waitlist_send_admin_notification( $data, $post_id );
-	tempus_waitlist_send_welcome( $data );
+	/*
+	 * Already confirmed: say so and send nothing. Re-mailing a confirmation
+	 * link to someone already on the list is noise, and the link would not
+	 * work anyway because the token was burned on first use.
+	 */
+	if ( 'publish' === get_post_status( $post_id ) ) {
+		return new WP_REST_Response( [
+			'success' => true,
+			'message' => __( "You're already on the list. Nothing more to do.", 'tempus' ),
+		], 200 );
+	}
+
+	// Pending: issue a fresh token and send the confirmation request. Mail
+	// failure must never cost us the row — it is already saved.
+	$token = tempus_waitlist_issue_token( $post_id );
+	tempus_waitlist_send_confirmation( $data, tempus_waitlist_confirm_url( $post_id, $token ) );
 
 	return new WP_REST_Response( [
 		'success' => true,
-		'message' => __( "You're on the list. We'll be in touch before the doors open.", 'tempus' ),
+		'message' => __( 'Almost there — check your inbox and click the link to confirm your place.', 'tempus' ),
 	], 200 );
 }

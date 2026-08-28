@@ -57,7 +57,7 @@ function tempus_waitlist_store( array $data ) {
 
 	$existing = get_posts( [
 		'post_type'        => TEMPUS_WAITLIST_CPT,
-		'post_status'      => 'any',
+		'post_status'      => [ 'pending', 'publish' ],
 		'posts_per_page'   => 1,
 		'fields'           => 'ids',
 		'no_found_rows'    => true,
@@ -72,6 +72,7 @@ function tempus_waitlist_store( array $data ) {
 
 	if ( $existing ) {
 		$post_id = (int) $existing[0];
+		// Update details but never downgrade a confirmed entry back to pending.
 		wp_update_post( [
 			'ID'         => $post_id,
 			'post_title' => $data['name'] ?: $data['email'],
@@ -79,7 +80,8 @@ function tempus_waitlist_store( array $data ) {
 	} else {
 		$post_id = wp_insert_post( [
 			'post_type'   => TEMPUS_WAITLIST_CPT,
-			'post_status' => 'publish',
+			// 'pending' until they click the link in their email.
+			'post_status' => 'pending',
 			'post_title'  => $data['name'] ?: $data['email'],
 		], true );
 	}
@@ -116,6 +118,7 @@ add_filter( 'manage_' . TEMPUS_WAITLIST_CPT . '_posts_columns', function ( $colu
 		'tempus_email'  => __( 'Email', 'tempus' ),
 		'tempus_mobile' => __( 'Mobile', 'tempus' ),
 		'tempus_tier'   => __( 'Tier Interest', 'tempus' ),
+		'tempus_status' => __( 'Status', 'tempus' ),
 		'date'          => __( 'Joined', 'tempus' ),
 	];
 } );
@@ -141,6 +144,16 @@ add_action( 'manage_' . TEMPUS_WAITLIST_CPT . '_posts_custom_column', function (
 		case 'tempus_tier':
 			$tier = get_post_meta( $post_id, '_tempus_tier', true );
 			echo $tier ? esc_html( $tier ) : '<span style="color:#999">&mdash;</span>';
+			break;
+
+		case 'tempus_status':
+			if ( 'publish' === get_post_status( $post_id ) ) {
+				echo '<span style="color:#1a7f37;font-weight:600">'
+					. esc_html__( 'Confirmed', 'tempus' ) . '</span>';
+			} else {
+				echo '<span style="color:#b26a00">'
+					. esc_html__( 'Awaiting confirmation', 'tempus' ) . '</span>';
+			}
 			break;
 	}
 }, 10, 2 );
@@ -205,9 +218,21 @@ add_action( 'admin_post_tempus_waitlist_export', function () {
 
 	check_admin_referer( 'tempus_waitlist_export', 'tempus_nonce' );
 
+	/*
+	 * Confirmed entries only by default.
+	 *
+	 * The export is what you will paste into a mailing platform, and
+	 * unconfirmed addresses are exactly what damages a new sending domain's
+	 * reputation. Filter this if you need the pending list for analysis.
+	 */
+	$statuses = (array) apply_filters(
+		'tempus_waitlist_export_statuses',
+		[ 'publish' ]
+	);
+
 	$entries = get_posts( [
 		'post_type'      => TEMPUS_WAITLIST_CPT,
-		'post_status'    => 'any',
+		'post_status'    => $statuses,
 		'posts_per_page' => -1,
 		'orderby'        => 'date',
 		'order'          => 'ASC',
@@ -222,7 +247,7 @@ add_action( 'admin_post_tempus_waitlist_export', function () {
 	// UTF-8 BOM so Excel doesn't mangle accented names.
 	fwrite( $out, "\xEF\xBB\xBF" );
 
-	fputcsv( $out, [ 'Name', 'Email', 'Mobile', 'Tier Interest', 'Joined' ] );
+	fputcsv( $out, [ 'Name', 'Email', 'Mobile', 'Tier Interest', 'Status', 'Joined', 'Confirmed' ] );
 
 	foreach ( $entries as $entry ) {
 		fputcsv( $out, array_map( 'tempus_csv_cell', [
@@ -230,7 +255,9 @@ add_action( 'admin_post_tempus_waitlist_export', function () {
 			get_post_meta( $entry->ID, '_tempus_email', true ),
 			get_post_meta( $entry->ID, '_tempus_mobile', true ),
 			get_post_meta( $entry->ID, '_tempus_tier', true ),
+			'publish' === $entry->post_status ? 'Confirmed' : 'Pending',
 			get_post_meta( $entry->ID, '_tempus_captured_at', true ) ?: $entry->post_date,
+			get_post_meta( $entry->ID, '_tempus_confirmed_at', true ),
 		] ) );
 	}
 
