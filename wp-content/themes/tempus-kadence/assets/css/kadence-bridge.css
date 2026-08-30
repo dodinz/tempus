@@ -109,7 +109,7 @@ body.content-style-unboxed .site,
    FOOTER (Kadence footer builder)
    ============================================================ */
 .site-footer {
-  background: var(--surface-container-lowest);
+  background: #000000;
   border-top: 1px solid var(--outline-variant);
   color: var(--on-surface-variant);
 }

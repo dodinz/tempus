@@ -28,14 +28,14 @@
    ========================================================= */
 
 :root {
-	--t-bg:        var(--near-black,        #0F0A07);  /* near-black brown   */
-	--t-panel:     var(--espresso,          #1A120C);  /* cards, ritual box  */
-	--t-line:      var(--border-gold,       rgba(200, 151, 63, .16));
-	--t-gold:      var(--gold-tempus,       #C8973F);  /* buttons, price     */
-	--t-gold-soft: var(--gold-deep,         #E0B45F);  /* hover              */
-	--t-cream:     var(--white,             #F3EADC);  /* headings, body     */
-	--t-muted:     var(--on-surface-variant, #A2907A); /* labels, old price  */
-	--t-green:     #6FA96B;                            /* in-stock dot       */
+	--t-bg:        var(--bg-page,           #0F0A07);  /* near-black brown   */
+	--t-panel:     var(--surface-card,      #1A120C);  /* cards, ritual box  */
+	--t-line:      var(--outline-variant,   rgba(200, 151, 63, .16));
+	--t-gold:      var(--accent,            #C8973F);  /* buttons, price     */
+	--t-gold-soft: var(--accent-hover,      #E0B45F);  /* hover              */
+	--t-cream:     var(--text-primary,      #F3EADC);  /* headings, body     */
+	--t-muted:     var(--text-faint,        #A2907A);  /* labels, old price  */
+	--t-green:     var(--success,           #6FA96B);  /* in-stock dot       */
 
 	/* Licensed brand faces — self-hosted, no substitution.
 	   Serif carries the product name and tasting prose; the condensed
@@ -55,52 +55,115 @@
 	color: var(--t-cream);
 }
 
-/* Kill the theme's page title bar and breadcrumbs on products */
 .single-product .entry-hero-container-inner,
 .single-product .woocommerce-breadcrumb,
-.single-product .product_meta,
 .single-product .woocommerce-product-rating {
-	display: none !important;
+	display: none;
 }
 
-/* Woo's default green "Sale!" flash — the design uses the Save badge instead */
-.single-product .woocommerce-product-gallery .onsale {
-	display: none;
+/* The wrapper div is now a plain block — no grid, no float games.
+   All layout happens inside .tempus-hero-inner. */
+.tempus-product {
+	display: block;
 }
 
 
 /* ---------------------------------------------------------
-   1. HERO — image left, details right, ambient background
+   HERO
+   Background bleeds full width; content is capped and centred.
    --------------------------------------------------------- */
-.single-product div.product {
-	position: relative;
-	display: grid;
-	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-	gap: clamp(2rem, 5vw, 5rem);
-	align-items: center;
-	padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 4vw, 4rem);
+.tempus-hero {
 	background-color: #120C08;
 	background-image:
 		linear-gradient(105deg, rgba(15, 10, 7, .94) 35%, rgba(15, 10, 7, .55) 100%),
 		var(--tempus-hero-image, none);
 	background-size: cover;
 	background-position: center;
+	border-bottom: 1px solid var(--t-line);
+}
+
+.tempus-hero-inner {
+	max-width: var(--t-max, 1400px);
+	margin-inline: auto;
+	display: grid;
+	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+	gap: clamp(2rem, 5vw, 5rem);
+	align-items: center;
+	padding: clamp(3rem, 7vw, 6rem) clamp(1.25rem, 4vw, 4rem);
+}
+
+
+/* ---------------------------------------------------------
+   HERO — IMAGE COLUMN
+   --------------------------------------------------------- */
+.tempus-hero-media {
+	position: relative;
+}
+
+.tempus-hero-figure {
+	margin: 0;
+	max-width: 440px;
+}
+
+.tempus-hero-image {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 4;
+	object-fit: cover;
+	background: #000;
 	border: 1px solid var(--t-line);
 	border-radius: 2px;
 }
 
-.single-product .woocommerce-product-gallery,
-.single-product .summary.entry-summary {
-	width: 100% !important;
-	float: none !important;
-	margin: 0 !important;
+.tempus-hero-thumbs {
+	display: flex;
+	gap: .6rem;
+	list-style: none;
+	margin: .85rem 0 0;
+	padding: 0;
+	max-width: 440px;
 }
 
-.single-product .woocommerce-product-gallery img {
+.tempus-hero-thumbs li {
+	flex: 0 0 68px;
+	margin: 0;
+}
+
+.tempus-hero-thumbs img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+	object-fit: cover;
+	border: 1px solid var(--t-line);
 	border-radius: 2px;
+	opacity: .65;
+	cursor: pointer;
+	transition: opacity .2s ease, border-color .2s ease;
 }
 
-/* Eyebrow — reused in several places */
+.tempus-hero-thumbs img:hover {
+	opacity: 1;
+	border-color: var(--t-gold);
+}
+
+/* Woo's round green "Sale!" bubble — the Save badge replaces it */
+.tempus-hero .onsale {
+	display: none;
+}
+
+
+/* ---------------------------------------------------------
+   HERO — DETAIL COLUMN
+   --------------------------------------------------------- */
+.tempus-hero-detail {
+	width: auto;
+	float: none;
+	margin: 0;
+	padding: 0;
+}
+
 .tempus-eyebrow {
 	font-family: var(--t-sans);
 	font-size: .72rem;
@@ -111,7 +174,7 @@
 	margin: 0 0 .9rem;
 }
 
-.single-product .product_title {
+.tempus-hero-detail .product_title {
 	font-family: var(--t-serif);
 	font-size: clamp(2.75rem, 6vw, 5rem);
 	font-weight: 500;
@@ -119,9 +182,10 @@
 	letter-spacing: -.01em;
 	color: var(--t-cream);
 	margin: 0 0 1.5rem;
+	max-width: 12em;
 }
 
-.single-product .woocommerce-product-details__short-description {
+.tempus-hero-detail .woocommerce-product-details__short-description {
 	font-family: var(--t-serif);
 	font-size: 1.2rem;          /* Cormorant runs small — sized up to compensate */
 	line-height: 1.65;
@@ -130,8 +194,9 @@
 	margin-bottom: 2rem;
 }
 
+
 /* --- Price row --- */
-.single-product .summary > .price {
+.tempus-hero-detail > .price {
 	display: flex;
 	align-items: baseline;
 	flex-wrap: wrap;
@@ -140,21 +205,22 @@
 	font-family: var(--t-serif);
 }
 
-.single-product .summary > .price ins {
+.tempus-hero-detail > .price ins {
 	order: 1;
 	text-decoration: none;
 	font-size: 2.6rem;
 	color: var(--t-gold);
+	background: transparent;
 }
 
-.single-product .summary > .price del {
+.tempus-hero-detail > .price del {
 	order: 2;
 	font-size: 1.15rem;
 	color: var(--t-muted);
 	opacity: 1;
 }
 
-.single-product .summary > .price > .amount {   /* non-sale products */
+.tempus-hero-detail > .price > .amount {   /* products not on sale */
 	font-size: 2.6rem;
 	color: var(--t-gold);
 }
@@ -166,23 +232,28 @@
 	font-weight: 700;
 	letter-spacing: .12em;
 	text-transform: uppercase;
-	color: #9BD08F;
-	background: rgba(111, 169, 107, .14);
-	border: 1px solid rgba(111, 169, 107, .35);
+	white-space: nowrap;
 	border-radius: 2px;
 	padding: .35rem .6rem;
-	white-space: nowrap;
+
+	color: #9BD08F;                                            /* fallback */
+	color: color-mix(in srgb, var(--t-green) 82%, white);
+	background: rgba(111, 169, 107, .14);                      /* fallback */
+	background: color-mix(in srgb, var(--t-green) 14%, transparent);
+	border: 1px solid rgba(111, 169, 107, .35);                /* fallback */
+	border: 1px solid color-mix(in srgb, var(--t-green) 38%, transparent);
 }
 
-/* --- Quantity + Add to cart row --- */
-.single-product form.cart {
+
+/* --- Quantity + Add to cart --- */
+.tempus-hero-detail form.cart {
 	display: flex;
 	align-items: stretch;
 	gap: 1rem;
 	margin: 0 0 1rem;
 }
 
-.single-product form.cart .quantity {
+.tempus-hero-detail form.cart .quantity {
 	display: flex;
 	align-items: center;
 	border: 1px solid var(--t-line);
@@ -191,22 +262,21 @@
 	min-width: 150px;
 }
 
-.single-product form.cart .quantity input[type="number"],
-.single-product form.cart .quantity .qty {
+.tempus-hero-detail form.cart .quantity input[type="number"],
+.tempus-hero-detail form.cart .quantity .qty {
 	background: transparent;
 	border: 0;
+	box-shadow: none;
 	color: var(--t-cream);
 	text-align: center;
 	font-family: var(--t-sans);
 	font-size: 1rem;
 	width: 100%;
-	box-shadow: none;
 }
 
-/* Kadence's built-in +/- buttons */
-.single-product form.cart .kadence-quantity-button,
-.single-product form.cart .quantity .minus,
-.single-product form.cart .quantity .plus {
+.tempus-hero-detail form.cart .kadence-quantity-button,
+.tempus-hero-detail form.cart .quantity .minus,
+.tempus-hero-detail form.cart .quantity .plus {
 	background: transparent;
 	border: 0;
 	color: var(--t-muted);
@@ -215,14 +285,15 @@
 	cursor: pointer;
 	transition: color .2s ease;
 }
-.single-product form.cart .kadence-quantity-button:hover,
-.single-product form.cart .quantity .minus:hover,
-.single-product form.cart .quantity .plus:hover {
-	color: var(--t-gold);
+
+.tempus-hero-detail form.cart .kadence-quantity-button:hover,
+.tempus-hero-detail form.cart .quantity .minus:hover,
+.tempus-hero-detail form.cart .quantity .plus:hover {
 	background: transparent;
+	color: var(--t-gold);
 }
 
-.single-product form.cart button.single_add_to_cart_button {
+.tempus-hero-detail form.cart button.single_add_to_cart_button {
 	flex: 1;
 	min-width: 220px;
 	background: var(--t-gold);
@@ -237,10 +308,12 @@
 	padding: 1.15rem 2rem;
 	transition: background .25s ease, transform .25s ease;
 }
-.single-product form.cart button.single_add_to_cart_button:hover {
+
+.tempus-hero-detail form.cart button.single_add_to_cart_button:hover {
 	background: var(--t-gold-soft);
 	transform: translateY(-1px);
 }
+
 
 /* --- Stock line --- */
 .tempus-stock {
@@ -255,16 +328,47 @@
 	color: var(--t-muted);
 	margin: 0;
 }
+
 .tempus-dot {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
 	background: var(--t-green);
-	box-shadow: 0 0 8px rgba(111, 169, 107, .8);
+	box-shadow: 0 0 8px color-mix(in srgb, var(--t-green) 70%, transparent);
 }
+
 .tempus-stock.is-out .tempus-dot {
 	background: #9A6B4F;
 	box-shadow: none;
+}
+
+
+/* ---------------------------------------------------------
+   HERO — MOBILE
+   (section 5 of product-page.css still handles the rest)
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+	.tempus-hero-inner {
+		grid-template-columns: 1fr;
+	}
+
+	.tempus-hero-figure,
+	.tempus-hero-thumbs {
+		max-width: 360px;
+		margin-inline: auto;
+	}
+
+	.tempus-hero-detail .product_title {
+		max-width: none;
+	}
+
+	.tempus-hero-detail form.cart {
+		flex-wrap: wrap;
+	}
+
+	.tempus-hero-detail form.cart button.single_add_to_cart_button {
+		width: 100%;
+	}
 }
 
 
@@ -468,96 +572,75 @@
 }
 .tempus-viewall:hover { color: var(--t-gold-soft); }
 
-/* --- Product cards --- */
-.tempus-related ul.products li.product,
+/* ---------------------------------------------------------
+   GRID
+   --------------------------------------------------------- */
+.woocommerce ul.products {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Kadence and Woo both ship float/width rules for the old markup */
 .woocommerce ul.products li.product {
-	position: relative;
+	width: auto;
+	float: none;
+	margin: 0;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — the frame
+   --------------------------------------------------------- */
+.tempus-card {
+	display: flex;
+	flex-direction: column;
 	background: var(--t-panel);
 	border: 1px solid var(--t-line);
-	border-radius: 3px;
+	border-radius: 6px;
 	overflow: hidden;
 	text-align: left;
 	transition: transform .3s ease, border-color .3s ease;
+	container-type: inline-size; /* query container for the @container rule below */
 }
-.woocommerce ul.products li.product:hover {
+
+.tempus-card:hover {
 	transform: translateY(-4px);
-	border-color: rgba(200, 151, 63, .4);
+	border-color: var(--t-gold);
 }
 
-.woocommerce ul.products li.product a img {
-	margin: 0;
-	aspect-ratio: 4 / 5;
-	object-fit: cover;
+
+/* ---------------------------------------------------------
+   CARD — the photo panel (the "mount board")
+   Near-black, darker than the card body, with breathing room
+   around the bottle.
+   --------------------------------------------------------- */
+.tempus-card-frame {
+	position: relative;
+	background: linear-gradient(360deg, #000000, #150500);
+	padding: 26px;
 }
 
-.woocommerce ul.products li.product .woocommerce-loop-product__title,
-.woocommerce ul.products li.product .tempus-card-eyebrow,
-.woocommerce ul.products li.product .tempus-card-meta,
-.woocommerce ul.products li.product .price,
-.woocommerce ul.products li.product .button {
-	margin-left: 1.5rem;
-	margin-right: 1.5rem;
-}
-
-.tempus-card-eyebrow {
-	font-family: var(--t-sans);
-	font-size: .62rem;
-	font-weight: 600;
-	letter-spacing: .16em;
-	text-transform: uppercase;
-	color: var(--t-gold);
-	margin-top: 1.5rem !important;
-	margin-bottom: .5rem !important;
-}
-
-.woocommerce ul.products li.product .woocommerce-loop-product__title {
-	font-family: var(--t-serif) !important;
-	font-size: 1.5rem !important;
-	font-weight: 500;
-	color: var(--t-cream);
-	padding: 0 !important;
-	margin-bottom: .4rem !important;
-}
-
-.tempus-card-meta {
-	font-family: var(--t-sans);
-	font-size: .8rem;
-	color: var(--t-muted);
-	margin-bottom: 1rem !important;
-}
-
-.woocommerce ul.products li.product .price {
+.tempus-card-media {
 	display: block;
-	font-family: var(--t-serif);
-	font-size: 1.45rem;
-	color: var(--t-gold);
-	margin-bottom: 1.5rem !important;
 }
 
-.woocommerce ul.products li.product .button,
-.woocommerce ul.products li.product .add_to_cart_button {
-	display: inline-block;
-	font-family: var(--t-sans);
-	font-size: .64rem;
-	font-weight: 700;
-	letter-spacing: .16em;
-	text-transform: uppercase;
-	color: var(--t-gold);
-	background: transparent;
-	border: 1px solid var(--t-gold);
+.woocommerce ul.products li.product .tempus-card-frame img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 4;
+	object-fit: contain;
+	margin: 0;
 	border-radius: 2px;
-	padding: .75rem 1.35rem;
-	margin-bottom: 1.5rem !important;
-}
-.woocommerce ul.products li.product .button:hover {
-	background: var(--t-gold);
-	color: #191007;
 }
 
 .tempus-limited {
 	position: absolute;
-	top: 1rem;
-	left: 1rem;
+	top: 14px;
+	left: 14px;
 	z-index: 3;
 	font-family: var(--t-sans);
 	font-size: .6rem;
@@ -570,9 +653,153 @@
 	border-radius: 2px;
 }
 
-/* Hide Woo's default round "Sale!" bubble on cards */
+/* Woo's round "Sale!" bubble — not part of the design */
 .woocommerce ul.products li.product .onsale {
 	display: none;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — the body (the "caption plate")
+   --------------------------------------------------------- */
+.tempus-card-body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	padding: 20px;
+}
+
+.tempus-card-eyebrow {
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--on-surface-variant);
+	margin: 0 0 .5rem;
+}
+
+.tempus-card-title {
+	font-family: var(--t-serif);
+	font-size: 2.0rem;
+	font-weight: 500;
+	line-height: 1.2;
+	margin: 0 0 .4rem;
+	padding: 0;
+}
+
+.tempus-card-title a {
+	color: var(--t-cream);
+	text-decoration: none;
+}
+
+.tempus-card-title a:hover {
+	color: var(--t-gold);
+}
+
+.tempus-card-meta {
+	font-family: var(--t-sans);
+	font-size: .8rem;
+	color: var(--t-muted);
+	margin: 0 0 1.25rem;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — price and button on one row
+   margin-top:auto pins this to the bottom so cards with
+   shorter names still line their buttons up.
+   --------------------------------------------------------- */
+.tempus-card-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: auto;
+}
+
+.woocommerce ul.products li.product .tempus-card-foot .price {
+	display: flex;
+	align-items: baseline;
+	gap: .5rem;
+	margin: 0;
+	font-family: var(--t-serif);
+	font-size: 1.45rem;
+	color: var(--t-gold);
+}
+
+/* Sale price first, original struck through after — matches the hero */
+.woocommerce ul.products li.product .tempus-card-foot .price ins {
+	order: 1;
+	text-decoration: none;
+	background: transparent;
+	color: var(--t-gold);
+}
+
+.woocommerce ul.products li.product .tempus-card-foot .price del {
+	order: 2;
+	font-size: .85rem;
+	color: var(--t-muted);
+	opacity: 1;
+}
+
+.woocommerce ul.products li.product .tempus-card-foot .button,
+.woocommerce ul.products li.product .tempus-card-foot .add_to_cart_button {
+	flex: 0 0 auto;
+	display: inline-block;
+	font-family: var(--t-sans);
+	font-size: .64rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--t-gold);
+	background: transparent;
+	border: 1px solid var(--t-gold);
+	border-radius: 2px;
+	padding: .75rem 1.35rem;
+	margin: 0;
+	transition: background .25s ease, color .25s ease;
+}
+
+.woocommerce ul.products li.product .tempus-card-foot .button:hover,
+.woocommerce ul.products li.product .tempus-card-foot .added_to_cart:hover {
+	background: var(--t-gold);
+	color: #191007;
+}
+
+/* "View cart" link Woo appends after an ajax add */
+.woocommerce ul.products li.product .tempus-card-foot .added_to_cart {
+	flex: 0 0 100%;
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+	margin-top: .5rem;
+}
+
+
+/* ---------------------------------------------------------
+   NARROW CARDS
+   Below ~320px of card width the foot row runs out of space,
+   so let it stack rather than squash the button.
+   --------------------------------------------------------- */
+@container (max-width: 320px) {
+	.tempus-card-foot {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+@media (max-width: 480px) {
+	.tempus-card-frame {
+		padding: 18px;
+	}
+
+	.tempus-card-body {
+		padding: 16px;
+	}
 }
 
 
@@ -580,7 +807,6 @@
    5. MOBILE
    --------------------------------------------------------- */
 @media (max-width: 900px) {
-	.single-product div.product,
 	.tempus-story-inner {
 		grid-template-columns: 1fr;
 	}
@@ -588,13 +814,6 @@
 	.tempus-spec {
 		border-right: 0;
 		border-bottom: 1px solid var(--t-line);
-	}
-
-	.single-product form.cart {
-		flex-wrap: wrap;
-	}
-	.single-product form.cart button.single_add_to_cart_button {
-		width: 100%;
 	}
 
 	.tempus-viewall {
@@ -619,4 +838,32 @@
 	.single-product form.cart button.single_add_to_cart_button {
 		transition: none;
 	}
+}
+
+/* ---------------------------------------------------------
+   7. CONTENT WIDTH
+   Backgrounds bleed edge to edge; content stays centred.
+   Tune --t-max and everything follows.
+   --------------------------------------------------------- */
+:root {
+	--t-max: 1400px;
+}
+
+.single-product div.product,
+.tempus-specbar,
+.tempus-story,
+.tempus-related {
+	max-width: var(--t-max);
+	margin-inline: auto;
+}
+
+/* Stop the bottle photo inflating on very wide screens */
+.single-product .woocommerce-product-gallery {
+	max-width: 620px;
+}
+
+/* Keep prose at a readable measure regardless of container width */
+.single-product .woocommerce-product-details__short-description,
+.tempus-notes-body p {
+	max-width: 32em;
 }

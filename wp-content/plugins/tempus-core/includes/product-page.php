@@ -36,6 +36,9 @@ function tempus_product_cleanup() {
 	// The grey "Description / Reviews" tab strip — replaced by our own section.
 	remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10 );
 
+	// Default gallery — the custom content-single-product.php template prints its own hero image.
+	remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
+
 	// Move short description from below the price (20) to above it (9).
 	remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
 	add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 9 );
@@ -278,7 +281,6 @@ function tempus_related_close() {
  * 8. PRODUCT CARD EXTRAS (used in the related grid AND the shop page)
  * Adds the small eyebrow above the name and the meta line below it.
  * ======================================================= */
-add_action( 'woocommerce_shop_loop_item_title', 'tempus_loop_eyebrow', 5 );
 function tempus_loop_eyebrow() {
 	global $product;
 
@@ -295,21 +297,37 @@ function tempus_loop_eyebrow() {
 	}
 }
 
-add_action( 'woocommerce_after_shop_loop_item_title', 'tempus_loop_meta', 6 );
 function tempus_loop_meta() {
 	global $product;
 
-	$bits = array();
-	foreach ( $product->get_attributes() as $attribute ) {
-		if ( ! $attribute->get_visible() ) {
-			continue;
-		}
-		$value = $product->get_attribute( $attribute->get_name() );
-		if ( $value ) {
-			$bits[] = str_replace( ', ', ' · ', $value );
-		}
-		if ( count( $bits ) >= 2 ) {
-			break;
+	// Prefer the two attributes the design calls for — Region and ABV —
+	// looked up by their taxonomy slugs (verified in the DB: pa_region, pa_abv).
+	$bits   = array();
+	$region = $product->get_attribute( 'pa_region' );
+	$abv    = $product->get_attribute( 'pa_abv' );
+
+	if ( $region ) {
+		$bits[] = str_replace( ', ', ' · ', $region );
+	}
+	if ( $abv ) {
+		$bits[] = str_replace( ', ', ' · ', $abv );
+	}
+
+	// Neither found (e.g. cigars, vinyl, which carry their own attribute
+	// set) — fall back to the first two visible attributes so those product
+	// types still show something.
+	if ( empty( $bits ) ) {
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_visible() ) {
+				continue;
+			}
+			$value = $product->get_attribute( $attribute->get_name() );
+			if ( $value ) {
+				$bits[] = str_replace( ', ', ' · ', $value );
+			}
+			if ( count( $bits ) >= 2 ) {
+				break;
+			}
 		}
 	}
 
@@ -319,7 +337,6 @@ function tempus_loop_meta() {
 }
 
 // "LIMITED" corner badge — driven by a product tag called "Limited".
-add_action( 'woocommerce_before_shop_loop_item_title', 'tempus_limited_badge', 9 );
 function tempus_limited_badge() {
 	global $product;
 	if ( has_term( 'limited', 'product_tag', $product->get_id() ) ) {
