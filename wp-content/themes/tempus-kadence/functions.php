@@ -140,3 +140,8 @@ function tempus_kadence_plugin_notice() {
 	echo '<div class="notice notice-warning"><p><strong>Tempus:</strong> the <em>Tempus Core</em> plugin is not active. Homepage fields, product badges and taxonomy seeding are unavailable — activate it under Plugins.</p></div>';
 }
 add_action( 'admin_notices', 'tempus_kadence_plugin_notice' );
+
+/**
+ * Tempus — age verification gate.
+ */
+require_once get_stylesheet_directory() . '/inc/age-gate.php';

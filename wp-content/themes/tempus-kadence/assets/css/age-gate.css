@@ -1,0 +1,231 @@
+/* ============================================================
+   TEMPUS — AGE VERIFICATION GATE
+   Full-screen confirmation shown before the site is revealed.
+
+   Every colour, font and measurement below is a token from
+   tokens.css. Nothing here is hardcoded, so a palette change in
+   tokens.css flows straight through to this screen.
+
+   Buttons reuse .tz-btn / .tz-btn--primary / .tz-btn--secondary
+   from main.css — only layout is added here.
+   ============================================================ */
+
+/* ---- Visibility --------------------------------------------------------
+   Hidden by default. The inline <head> script adds .tz-gate-on to <html>
+   when the cookie is missing, which is what reveals it. Because that class
+   is set before the first paint, the page underneath never flashes.
+   ---------------------------------------------------------------------- */
+
+.tz-age-gate { display: none; }
+
+.tz-gate-on .tz-age-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 999999;              /* above Kadence's sticky header and drawers */
+  padding: var(--space-3);
+  overflow-y: auto;             /* short screens can still scroll the panel */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Freeze the page behind the gate. */
+.tz-gate-on,
+.tz-gate-on body { overflow: hidden; }
+
+/* Anything marked hidden stays hidden, whatever else the cascade says. */
+.tz-age-gate [hidden] { display: none !important; }
+
+/* ---- Backdrop ----------------------------------------------------------
+   Near-black, with a faint warm glow behind the panel so it reads as
+   candlelight rather than a flat sheet of black.
+   ---------------------------------------------------------------------- */
+
+.tz-age-gate__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 40%, rgba(200, 146, 42, .10) 0%, rgba(10, 8, 6, 0) 62%),
+    var(--near-black);
+}
+
+/* ---- Panel ------------------------------------------------------------- */
+
+.tz-age-gate__panel {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  text-align: center;
+  background: var(--near-black);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glow-warm);
+  animation: tzGateIn var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes tzGateIn {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- Brand lockup ------------------------------------------------------ */
+
+.tz-age-gate__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.tz-age-gate__brand img {
+  width: auto;
+  height: auto;
+  max-width: 220px;
+  max-height: 80px;
+}
+
+.tz-age-gate__wordmark {
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: .28em;
+  text-indent: .28em;            /* re-centres text that letter-spacing pushed left */
+  color: var(--white);
+}
+
+/* .tz-kicker (tagline) is inherited from main.css — gold, 12px, .32em. */
+
+/* ---- Divider with a gold diamond -------------------------------------- */
+
+.tz-age-gate__rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-3);
+}
+
+.tz-age-gate__rule::before,
+.tz-age-gate__rule::after {
+  content: "";
+  height: 1px;
+  width: 64px;
+  background: linear-gradient(90deg, transparent, var(--border-gold-strong));
+}
+.tz-age-gate__rule::after { transform: scaleX(-1); }
+
+.tz-age-gate__rule span {
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: var(--gold-aged);
+}
+
+/* ---- Copy -------------------------------------------------------------- */
+
+.tz-age-gate__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 6vw, 40px);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-display);
+  color: var(--white);
+}
+
+.tz-age-gate__body {
+  margin: 0 auto;
+  max-width: 380px;
+  font: var(--body-sm);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--on-surface-variant);
+}
+
+/* ---- Buttons ----------------------------------------------------------- */
+
+.tz-age-gate__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-3);
+}
+
+.tz-age-gate__actions .tz-btn {
+  width: 100%;
+  white-space: nowrap;           /* never break "Yes, I am 21 or over" mid-word */
+}
+
+/* Keyboard focus must stay obvious on a screen with no other landmarks. */
+.tz-age-gate .tz-btn:focus-visible,
+.tz-age-gate__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---- Small print ------------------------------------------------------- */
+
+.tz-age-gate__legal {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: var(--tracking-label-sm);
+  color: var(--ink-faint);
+}
+
+.tz-age-gate__legal--warn { color: var(--error); margin-top: var(--space-2); }
+
+/* The quiet "I answered that by mistake" text button. */
+.tz-age-gate__link {
+  margin-top: var(--space-2);
+  padding: 4px 8px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: var(--tracking-label-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--ink-faint);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.tz-age-gate__link:hover { color: var(--gold-tempus); }
+
+/* ---- Leaving ----------------------------------------------------------- */
+
+.tz-age-gate.is-leaving {
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+  pointer-events: none;
+}
+
+/* ---- Small screens ----------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .tz-age-gate__panel {
+    padding: var(--space-5) var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+  .tz-age-gate__wordmark { font-size: 28px; }
+  .tz-age-gate__rule::before,
+  .tz-age-gate__rule::after { width: 40px; }
+}
+
+/* Landscape phones: the panel is taller than the screen, so pin it to the
+   top and let the overlay scroll rather than clipping the buttons. */
+@media (max-height: 560px) {
+  .tz-gate-on .tz-age-gate { align-items: flex-start; }
+  .tz-age-gate__panel { margin: var(--space-3) auto; }
+}
+
+/* ---- Reduced motion ---------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .tz-age-gate__panel { animation: none; }
+  .tz-age-gate.is-leaving { transition: none; }
+}
