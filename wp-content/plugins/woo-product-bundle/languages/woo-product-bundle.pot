@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPC Product Bundles for WooCommerce 8.6.4\n"
+"Project-Id-Version: WPC Product Bundles for WooCommerce 8.6.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woo-product-bundle\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-14T04:55:48+00:00\n"
+"POT-Creation-Date: 2026-09-10T09:00:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: woo-product-bundle\n"
@@ -149,7 +149,7 @@ msgstr ""
 #. translators: dynamic price
 #: includes/class-backend.php:246
 #: includes/class-backend.php:248
-#: includes/class-woosb.php:1247
+#: includes/class-woosb.php:1457
 #, php-format
 msgid "before %s after"
 msgstr ""
@@ -179,9 +179,9 @@ msgstr ""
 #: includes/class-backend.php:273
 #: includes/class-backend.php:910
 #: includes/class-backend.php:916
-#: includes/class-woosb.php:964
-#: includes/class-woosb.php:982
-#: includes/class-woosb.php:1095
+#: includes/class-woosb.php:1158
+#: includes/class-woosb.php:1176
+#: includes/class-woosb.php:1305
 msgid "Bundled products"
 msgstr ""
 
@@ -432,7 +432,7 @@ msgstr ""
 #: includes/class-backend.php:522
 #: includes/class-backend.php:900
 #: includes/class-backend.php:905
-#: includes/class-woosb.php:1103
+#: includes/class-woosb.php:1313
 msgid "Bundles"
 msgstr ""
 
@@ -670,7 +670,7 @@ msgstr ""
 #: includes/class-backend.php:922
 #: includes/class-backend.php:929
 #: includes/class-backend.php:1956
-#: includes/class-woosb.php:1048
+#: includes/class-woosb.php:1246
 #, php-format
 msgid "Bundled products: %s"
 msgstr ""
@@ -693,7 +693,7 @@ msgstr ""
 #: includes/class-backend.php:958
 #: includes/class-backend.php:964
 #: includes/class-backend.php:2331
-#: includes/class-woosb.php:1162
+#: includes/class-woosb.php:1372
 msgid "Update"
 msgstr ""
 
@@ -1102,101 +1102,101 @@ msgstr ""
 msgid "* All selected products will be replaced after pressing Update!"
 msgstr ""
 
-#: includes/class-compatible.php:151
+#: includes/class-compatible.php:160
 msgid "Before bundled products"
 msgstr ""
 
-#: includes/class-compatible.php:152
+#: includes/class-compatible.php:161
 msgid "After bundled products"
 msgstr ""
 
-#: includes/class-compatible.php:153
+#: includes/class-compatible.php:162
 msgid "Before bundled products table"
 msgstr ""
 
-#: includes/class-compatible.php:154
+#: includes/class-compatible.php:163
 msgid "After bundled products table"
 msgstr ""
 
-#: includes/class-compatible.php:155
+#: includes/class-compatible.php:164
 msgid "Before bundled product"
 msgstr ""
 
-#: includes/class-compatible.php:156
+#: includes/class-compatible.php:165
 msgid "After bundled product"
 msgstr ""
 
-#: includes/class-compatible.php:157
+#: includes/class-compatible.php:166
 msgid "Before bundled product name"
 msgstr ""
 
-#: includes/class-compatible.php:158
+#: includes/class-compatible.php:167
 msgid "After bundled product name"
 msgstr ""
 
-#: includes/class-compatible.php:159
+#: includes/class-compatible.php:168
 msgid "Before bundled product price"
 msgstr ""
 
-#: includes/class-compatible.php:160
+#: includes/class-compatible.php:169
 msgid "After bundled product price"
 msgstr ""
 
-#: includes/class-compatible.php:161
+#: includes/class-compatible.php:170
 msgid "Before bundles"
 msgstr ""
 
-#: includes/class-compatible.php:162
+#: includes/class-compatible.php:171
 msgid "After bundles"
 msgstr ""
 
-#: includes/class-woosb.php:390
+#: includes/class-woosb.php:403
 msgid "One of the bundled products is unavailable."
 msgstr ""
 
-#: includes/class-woosb.php:391
-#: includes/class-woosb.php:412
-#: includes/class-woosb.php:429
-#: includes/class-woosb.php:435
-#: includes/class-woosb.php:445
-#: includes/class-woosb.php:453
-#: includes/class-woosb.php:461
-#: includes/class-woosb.php:480
-#: includes/class-woosb.php:491
-#: includes/class-woosb.php:497
-#: includes/class-woosb.php:512
-#: includes/class-woosb.php:520
+#: includes/class-woosb.php:404
+#: includes/class-woosb.php:425
+#: includes/class-woosb.php:442
+#: includes/class-woosb.php:448
+#: includes/class-woosb.php:458
+#: includes/class-woosb.php:466
+#: includes/class-woosb.php:474
+#: includes/class-woosb.php:493
+#: includes/class-woosb.php:504
+#: includes/class-woosb.php:510
+#: includes/class-woosb.php:525
 #: includes/class-woosb.php:533
-#: includes/class-woosb.php:539
-#: includes/class-woosb.php:545
+#: includes/class-woosb.php:546
+#: includes/class-woosb.php:552
+#: includes/class-woosb.php:558
 msgid "You cannot add this bundle to the cart."
 msgstr ""
 
 #. translators: product name
-#: includes/class-woosb.php:444
+#: includes/class-woosb.php:457
 #, php-format
 msgid "\"%s\" is un-purchasable."
 msgstr ""
 
 #. translators: product name
-#: includes/class-woosb.php:452
+#: includes/class-woosb.php:465
 #, php-format
 msgid "You cannot add another \"%s\" to the cart."
 msgstr ""
 
 #. translators: product name
-#: includes/class-woosb.php:460
+#: includes/class-woosb.php:473
 #, php-format
 msgid "\"%s\" is protected and cannot be purchased."
 msgstr ""
 
 #. translators: product name
-#: includes/class-woosb.php:479
+#: includes/class-woosb.php:492
 #, php-format
 msgid "\"%s\" has not enough stock."
 msgstr ""
 
-#: includes/class-woosb.php:1324
-#: includes/class-woosb.php:1359
+#: includes/class-woosb.php:1534
+#: includes/class-woosb.php:1569
 msgid "From"
 msgstr ""

@@ -112,6 +112,72 @@ if ( ! class_exists( 'WPCleverWoosb_Helper' ) ) {
 		}
 
 		/**
+		 * Allocate a total discount amount across items proportionally using Largest Remainder Method (Hare-Niemeyer).
+		 * Ensures sum(allocated_discounts) == total_discount down to the last penny without rounding errors.
+		 *
+		 * @param float $total_discount Total discount amount to allocate.
+		 * @param array<string|int, float> $item_amounts Map of item key => line amount.
+		 * @param int|null $precision Currency decimal precision (null to use wc_get_price_decimals()).
+		 * @return array<string|int, float> Map of item key => allocated discount.
+		 */
+		public static function allocate_discount_proportionally( $total_discount, $item_amounts, $precision = null ) {
+			$total_discount = (float) $total_discount;
+			$sum_amounts    = array_sum( $item_amounts );
+
+			if ( $total_discount <= 0 || $sum_amounts <= 0 ) {
+				return array_fill_keys( array_keys( $item_amounts ), 0.0 );
+			}
+
+			if ( $precision === null ) {
+				$precision = function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2;
+			}
+
+			$capped_discount = min( $total_discount, $sum_amounts );
+			$scale           = pow( 10, $precision );
+			$total_units     = (int) round( $capped_discount * $scale );
+
+			$allocations         = [];
+			$remainders          = [];
+			$allocated_units_sum = 0;
+
+			foreach ( $item_amounts as $key => $amount ) {
+				if ( $amount <= 0 ) {
+					$allocations[ $key ] = 0;
+					$remainders[ $key ]  = 0.0;
+					continue;
+				}
+
+				$exact_units         = ( $amount / $sum_amounts ) * $total_units;
+				$floor_units         = (int) floor( $exact_units );
+				$allocations[ $key ] = $floor_units;
+				$remainders[ $key ]  = $exact_units - $floor_units;
+				$allocated_units_sum += $floor_units;
+			}
+
+			$missing_units = $total_units - $allocated_units_sum;
+
+			if ( $missing_units > 0 ) {
+				arsort( $remainders );
+
+				foreach ( array_keys( $remainders ) as $key ) {
+					if ( $missing_units <= 0 ) {
+						break;
+					}
+					$allocations[ $key ] += 1;
+					$missing_units--;
+				}
+			}
+
+			$result = [];
+			foreach ( $allocations as $key => $units ) {
+				$result[ $key ] = round( $units / $scale, $precision );
+			}
+
+			return $result;
+		}
+
+
+		/**
 		 * Cache the woosb_check_variations_stock filter result (request-level).
 		 */
 		protected static function check_variations_stock(): bool {
