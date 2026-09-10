@@ -26,8 +26,24 @@ wp-config.php
 # Example plugin
 /wp-content/plugins/hello.php
 
+
+/wp-content/plugins/activelayer-anti-spam-spam-protection-for-forms-comments/*
+/wp-content/plugins/akismet/*
+/wp-content/plugins/advanced-custom-fields-pro/*
+/wp-content/plugins/advanced-custom-fields/*
+/wp-content/plugins/all-in-one-wp-migration/*
+/wp-content/plugins/kadence-blocks/*
+/wp-content/plugins/kadence-woocommerce-elementor/*
+/wp-content/plugins/surbma-yes-no-popup/*
+/wp-content/plugins/woo-product-bundle/*
+/wp-content/plugins/woocommerce/*
+/wp-content/plugins/wp-mail-smtp/*
+
 # Uploads
 /wp-content/uploads/
+
+# Backup
+/wp-content/ai1wm-backups/
 
 # Log files
 *.log
