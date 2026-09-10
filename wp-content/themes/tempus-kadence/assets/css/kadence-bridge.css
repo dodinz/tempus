@@ -205,3 +205,12 @@ input:focus, textarea:focus, select:focus {
 .wp-block-search .wp-block-search__input {
   border-color: var(--outline-variant);
 }
+
+/* ============================================================
+   ACCORDION (Kadence accordion block toggle icon) - Overriding the default icon size
+   ============================================================ */
+.kt-accodion-icon-style-xclose .kt-blocks-accordion-icon-trigger:after, 
+.kt-accodion-icon-style-xclose .kt-blocks-accordion-icon-trigger:before { 
+  height: 1px;
+  width: 10px;
+}

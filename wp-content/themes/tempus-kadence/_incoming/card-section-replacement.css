@@ -1,0 +1,243 @@
+/* =========================================================
+   TEMPUS — PRODUCT CARDS (rewritten for content-product.php)
+
+   THIS REPLACES the "product cards" portion of section 4 in
+   product-page.css — every rule from `.tempus-related ul.products
+   li.product` down to the `.onsale` rule at the end of the section.
+
+   KEEP the first part of section 4: `.tempus-related`,
+   `.tempus-related .related > h2` and `.tempus-viewall`.
+   Those still apply.
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   GRID
+   --------------------------------------------------------- */
+.woocommerce ul.products {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 22px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Kadence and Woo both ship float/width rules for the old markup */
+.woocommerce ul.products li.product {
+	width: auto;
+	float: none;
+	margin: 0;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — the frame
+   --------------------------------------------------------- */
+.tempus-card {
+	display: flex;
+	flex-direction: column;
+	background: var(--t-panel);
+	border: 1px solid var(--t-line);
+	border-radius: 6px;
+	overflow: hidden;
+	text-align: left;
+	transition: transform .3s ease, border-color .3s ease;
+}
+
+.tempus-card:hover {
+	transform: translateY(-4px);
+	border-color: var(--t-gold);
+}
+
+
+/* ---------------------------------------------------------
+   CARD — the photo panel (the "mount board")
+   Near-black, darker than the card body, with breathing room
+   around the bottle.
+   --------------------------------------------------------- */
+.tempus-card-frame {
+	position: relative;
+	background: var(--t-bg);
+	padding: 26px;
+}
+
+.tempus-card-media {
+	display: block;
+}
+
+.tempus-card-media img,
+.tempus-card-frame img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 4;
+	object-fit: contain;
+	margin: 0;
+	border-radius: 2px;
+}
+
+.tempus-limited {
+	position: absolute;
+	top: 14px;
+	left: 14px;
+	z-index: 3;
+	font-family: var(--t-sans);
+	font-size: .6rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: #191007;
+	background: var(--t-gold);
+	padding: .35rem .65rem;
+	border-radius: 2px;
+}
+
+/* Woo's round "Sale!" bubble — not part of the design */
+.woocommerce ul.products li.product .onsale {
+	display: none;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — the body (the "caption plate")
+   --------------------------------------------------------- */
+.tempus-card-body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	padding: 20px;
+}
+
+.tempus-card-eyebrow {
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--t-gold);
+	margin: 0 0 .5rem;
+}
+
+.tempus-card-title {
+	font-family: var(--t-serif);
+	font-size: 1.5rem;
+	font-weight: 500;
+	line-height: 1.2;
+	margin: 0 0 .4rem;
+	padding: 0;
+}
+
+.tempus-card-title a {
+	color: var(--t-cream);
+	text-decoration: none;
+}
+
+.tempus-card-title a:hover {
+	color: var(--t-gold);
+}
+
+.tempus-card-meta {
+	font-family: var(--t-sans);
+	font-size: .8rem;
+	color: var(--t-muted);
+	margin: 0 0 1.25rem;
+}
+
+
+/* ---------------------------------------------------------
+   CARD — price and button on one row
+   margin-top:auto pins this to the bottom so cards with
+   shorter names still line their buttons up.
+   --------------------------------------------------------- */
+.tempus-card-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: auto;
+}
+
+.tempus-card-foot .price {
+	display: flex;
+	align-items: baseline;
+	gap: .5rem;
+	margin: 0;
+	font-family: var(--t-serif);
+	font-size: 1.45rem;
+	color: var(--t-gold);
+}
+
+/* Sale price first, original struck through after — matches the hero */
+.tempus-card-foot .price ins {
+	order: 1;
+	text-decoration: none;
+	background: transparent;
+	color: var(--t-gold);
+}
+
+.tempus-card-foot .price del {
+	order: 2;
+	font-size: .85rem;
+	color: var(--t-muted);
+	opacity: 1;
+}
+
+.tempus-card-foot .button,
+.tempus-card-foot .add_to_cart_button {
+	flex: 0 0 auto;
+	display: inline-block;
+	font-family: var(--t-sans);
+	font-size: .64rem;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--t-gold);
+	background: transparent;
+	border: 1px solid var(--t-gold);
+	border-radius: 2px;
+	padding: .75rem 1.35rem;
+	margin: 0;
+	transition: background .25s ease, color .25s ease;
+}
+
+.tempus-card-foot .button:hover,
+.tempus-card-foot .added_to_cart:hover {
+	background: var(--t-gold);
+	color: #191007;
+}
+
+/* "View cart" link Woo appends after an ajax add */
+.tempus-card-foot .added_to_cart {
+	flex: 0 0 100%;
+	font-family: var(--t-sans);
+	font-size: .62rem;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--t-muted);
+	margin-top: .5rem;
+}
+
+
+/* ---------------------------------------------------------
+   NARROW CARDS
+   Below ~320px of card width the foot row runs out of space,
+   so let it stack rather than squash the button.
+   --------------------------------------------------------- */
+@container (max-width: 320px) {
+	.tempus-card-foot {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+@media (max-width: 480px) {
+	.tempus-card-frame {
+		padding: 18px;
+	}
+
+	.tempus-card-body {
+		padding: 16px;
+	}
+}

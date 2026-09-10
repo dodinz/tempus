@@ -1,4 +1,0 @@
-2026-08-06T04:11:06+00:00 INFO Automatic database update triggered.
-2026-08-06T04:11:06+00:00 INFO Scheduling database updates (from 10.9.4)...
-2026-08-06T04:11:06+00:00 INFO   [11.0.0] Scheduled 'wc_update_1100_enable_point_of_sale_feature'.
-2026-08-06T04:11:06+00:00 INFO Database updates scheduled.

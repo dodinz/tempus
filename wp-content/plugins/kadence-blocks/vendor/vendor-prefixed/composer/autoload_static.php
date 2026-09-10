@@ -4,7 +4,7 @@
 
 namespace KadenceWP\KadenceBlocks\Composer\Autoload;
 
-class ComposerStaticInitd92e822f64bb439b11d7ebe16e4ccebe
+class ComposerStaticInit4b2392a3bc3241129d333f4a0288545b
 {
     public static $files = array (
         'dfdcea4d84cc56c3d81598b2472a5a5d' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -1305,9 +1305,9 @@ class ComposerStaticInitd92e822f64bb439b11d7ebe16e4ccebe
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd92e822f64bb439b11d7ebe16e4ccebe::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd92e822f64bb439b11d7ebe16e4ccebe::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitd92e822f64bb439b11d7ebe16e4ccebe::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4b2392a3bc3241129d333f4a0288545b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4b2392a3bc3241129d333f4a0288545b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit4b2392a3bc3241129d333f4a0288545b::$classMap;
 
         }, null, ClassLoader::class);
     }
