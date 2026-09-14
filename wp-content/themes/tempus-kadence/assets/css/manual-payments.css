@@ -1,0 +1,558 @@
+/* =========================================================================
+   Tempus Rituals — manual payment methods (v2)
+   Checkout payment box, order confirmation panel, payment confirmation form.
+
+   Every colour here reads a token from tokens.css. The value after the
+   comma is only a fallback, in case this file loads somewhere tokens.css
+   does not. Change the palette in tokens.css and this follows along.
+   ====================================================================== */
+
+/* -------------------------------------------------------------------------
+   1. The payment method list at checkout
+   ---------------------------------------------------------------------- */
+
+.woocommerce-checkout #payment,
+.woocommerce-checkout .wc_payment_methods {
+	background: transparent;
+	border-radius: var(--radius-lg, 4px);
+}
+
+.woocommerce-checkout ul.wc_payment_methods {
+	margin: 0 0 1.5rem;
+	padding: 0;
+	list-style: none;
+	border: 0;
+}
+
+.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method {
+	margin: 0 0 .75rem;
+	padding: 10px;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	/* border-radius: var(--radius-lg, 4px); */
+	background: var(--surface-container-low, rgba(255, 255, 255, .02));
+	transition: border-color var(--dur, .3s) ease, background var(--dur, .3s) ease;
+}
+
+.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method:hover {
+	border-color: var(--gold-tempus, #b8964f);
+}
+
+.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method > label {
+	display: flex;
+	align-items: center;
+	gap: .75rem;
+	margin: 0;
+	padding: 1rem 1.25rem;
+	cursor: pointer;
+	font-family: var(--font-primary, inherit);
+	font-size: .95rem;
+	letter-spacing: .06em;
+	text-transform:capitalize;
+	color: var(--white, #f4f1ea);
+}
+
+.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method > label img {
+	max-height: 24px;
+	width: auto;
+	margin: 0;
+}
+
+.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method > input[type="radio"] {
+	accent-color: var(--gold-tempus, #b8964f);
+	width: 16px;
+	height: 16px;
+	margin: 0 0 0 1.25rem;
+	flex: 0 0 auto;
+}
+
+.woocommerce-checkout .payment_box {
+	margin: 0;
+	padding: 0 1.25rem 1.25rem;
+	background: transparent !important;
+	color: var(--on-surface-variant, #b8b2a6);
+	font-size: .9rem;
+	line-height: 1.6;
+}
+
+.woocommerce-checkout .payment_box::before {
+	display: none !important;
+}
+
+/* The line that sets expectations for the next screen. */
+.tempus-pay-next {
+	margin: 1rem 0 0;
+	padding: .8rem 1rem;
+	border-left: 2px solid var(--gold-tempus, #b8964f);
+	background: rgba(0, 0, 0, .18);
+	font-size: .85rem;
+	line-height: 1.65;
+	color: var(--on-surface-variant, #b8b2a6);
+}
+
+
+/* -------------------------------------------------------------------------
+   2. Account details panel — checkout, confirmation page, everywhere
+   ---------------------------------------------------------------------- */
+
+.tempus-pay-blurb p:last-child {
+	margin-bottom: 1rem;
+}
+
+.tempus-pay-details {
+	margin: 0 0 1.25rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: var(--radius-lg, 4px);
+	background: rgba(0, 0, 0, .25);
+	font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+	font-size: .875rem;
+	line-height: 1.9;
+	color: var(--white, #f4f1ea);
+}
+
+.tempus-pay-details p {
+	margin: 0;
+}
+
+.tempus-pay-details strong {
+	display: inline-block;
+	min-width: 9.5em;
+	color: var(--gold-tempus, #b8964f);
+	font-weight: 500;
+	letter-spacing: .04em;
+}
+
+.tempus-pay-qr {
+	margin: 0 0 1.25rem;
+	text-align: center;
+	max-width: 200px;
+}
+
+.tempus-pay-qr img {
+	display: block;
+	width: 180px;
+	max-width: 100%;
+	height: auto;
+	padding: 10px;
+	border-radius: var(--radius-lg, 4px);
+	background: #fff;
+}
+
+.tempus-pay-qr span {
+	display: block;
+	margin-top: .5rem;
+	font-size: .72rem;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--ink-faint, #8a857b);
+}
+
+
+/* -------------------------------------------------------------------------
+   3. The order confirmation panel
+
+   This is the most important screen in the whole flow — it is where the
+   customer finds out they still owe money. It should not look like a
+   receipt; it should look like an open task.
+   ---------------------------------------------------------------------- */
+
+.tempus-pay-panel {
+	margin: 0 0 2.5rem;
+	padding: 2rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: var(--radius-lg, 4px);
+	background: var(--surface-container-low, rgba(255, 255, 255, .02));
+}
+
+.tempus-pay-panel.is-awaiting {
+	border-color: var(--gold-tempus, #b8964f);
+	box-shadow: 0 0 0 1px var(--gold-tempus, #b8964f) inset;
+}
+
+.tempus-pay-panel__eyebrow {
+	margin: 0 0 .6rem;
+	font-size: .72rem;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--ink-faint, #8a857b);
+}
+
+.tempus-pay-panel__title {
+	margin: 0 0 .9rem;
+	font-family: var(--font-display, inherit);
+	font-size: clamp(1.3rem, 4vw, 1.85rem);
+	line-height: 1.25;
+	letter-spacing: .02em;
+	color: var(--white, #f4f1ea);
+}
+
+.tempus-pay-panel__title .woocommerce-Price-amount {
+	color: var(--gold-tempus, #b8964f);
+	white-space: nowrap;
+}
+
+.tempus-pay-panel__lede {
+	margin: 0 0 1.25rem;
+	font-size: .95rem;
+	line-height: 1.7;
+	color: var(--on-surface-variant, #b8b2a6);
+}
+
+.tempus-pay-panel__deadline {
+	margin: 0 0 1.5rem;
+	padding: .8rem 1rem;
+	border-left: 2px solid var(--gold-tempus, #b8964f);
+	background: rgba(0, 0, 0, .2);
+	font-size: .88rem;
+	line-height: 1.6;
+	color: var(--on-surface-variant, #b8b2a6);
+}
+
+.tempus-pay-panel__deadline strong {
+	color: var(--white, #f4f1ea);
+	white-space: nowrap;
+}
+
+/* The three steps. */
+.tempus-pay-steps {
+	margin: 0 0 1.5rem;
+	padding: 0;
+	list-style: none;
+	counter-reset: tempus-step;
+}
+
+.tempus-pay-steps li {
+	position: relative;
+	margin: 0 0 .75rem;
+	padding: 0 0 0 2.5rem;
+	font-size: .95rem;
+	line-height: 1.6;
+	color: var(--on-surface-variant, #b8b2a6);
+	counter-increment: tempus-step;
+}
+
+.tempus-pay-steps li::before {
+	content: counter( tempus-step );
+	position: absolute;
+	left: 0;
+	top: -1px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.7rem;
+	height: 1.7rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: 50%;
+	font-family: var(--font-display, inherit);
+	font-size: .78rem;
+	color: var(--gold-tempus, #b8964f);
+}
+
+.tempus-pay-steps li strong,
+.tempus-pay-steps li .woocommerce-Price-amount {
+	color: var(--white, #f4f1ea);
+	white-space: nowrap;
+}
+
+.tempus-pay-panel__saveit {
+	margin: 0 0 1.5rem;
+	font-size: .82rem;
+	line-height: 1.6;
+	color: var(--ink-faint, #8a857b);
+}
+
+/* What we received, once they have confirmed. */
+.tempus-pay-panel.is-received {
+	border-color: rgba(111, 169, 107, .45);
+	box-shadow: none;
+}
+
+.tempus-pay-panel__receipt {
+	margin: 0;
+	padding: 1rem 1.15rem;
+	list-style: none;
+	border: 1px solid rgba(111, 169, 107, .35);
+	border-radius: var(--radius-lg, 4px);
+	background: rgba(111, 169, 107, .1);
+}
+
+.tempus-pay-panel__receipt li {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 1rem;
+	margin: 0;
+	padding: .3rem 0;
+	font-size: .88rem;
+}
+
+.tempus-pay-panel__receipt span {
+	color: var(--ink-faint, #8a857b);
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	font-size: .72rem;
+}
+
+.tempus-pay-panel__receipt strong {
+	color: var(--white, #f4f1ea);
+	font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+	word-break: break-all;
+	text-align: right;
+}
+
+
+/* -------------------------------------------------------------------------
+   4. The confirmation form
+   ---------------------------------------------------------------------- */
+
+.tempus-confirm {
+	margin: 0;
+	padding: 1.5rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: var(--radius-lg, 4px);
+	background: rgba(0, 0, 0, .22);
+	transition: opacity var(--dur, .3s) ease;
+}
+
+.tempus-confirm.is-busy {
+	opacity: .55;
+	pointer-events: none;
+}
+
+.tempus-confirm__title {
+	margin: 0 0 .35rem;
+	font-family: var(--font-display, inherit);
+	font-size: .88rem;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--gold-tempus, #b8964f);
+}
+
+.tempus-confirm__hint {
+	margin: 0 0 1.25rem;
+	font-size: .85rem;
+	line-height: 1.6;
+	color: var(--ink-faint, #8a857b);
+}
+
+.tempus-confirm__field {
+	margin: 0 0 1rem;
+}
+
+.tempus-confirm__field > label {
+	display: block;
+	margin: 0 0 .4rem;
+	font-size: .78rem;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--on-surface-variant, #b8b2a6);
+}
+
+.tempus-confirm__ref {
+	display: block;
+	width: 100%;
+	padding: .8rem 1rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: 2px;
+	background: rgba(0, 0, 0, .35);
+	color: var(--white, #f4f1ea);
+	font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+	font-size: 1.05rem;
+	letter-spacing: .08em;
+	transition: border-color var(--dur, .3s) ease;
+}
+
+.tempus-confirm__ref:focus {
+	outline: none;
+	border-color: var(--gold-tempus, #b8964f);
+	box-shadow: 0 0 0 1px var(--gold-tempus, #b8964f);
+}
+
+.tempus-confirm__ref::placeholder {
+	color: var(--ink-faint, #8a857b);
+	letter-spacing: .04em;
+}
+
+.tempus-confirm__sub {
+	display: block;
+	margin-top: .4rem;
+	font-size: .76rem;
+	line-height: 1.5;
+	color: var(--ink-faint, #8a857b);
+}
+
+/* The "or" divider between the two ways of confirming. */
+.tempus-confirm__or {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin: 0 0 1rem;
+	color: var(--ink-faint, #8a857b);
+	font-size: .75rem;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+}
+
+.tempus-confirm__or::before,
+.tempus-confirm__or::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background: var(--border-gold, rgba(184, 150, 79, .28));
+}
+
+/* The visible file button. The real input hides inside it. */
+.tempus-confirm__file {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+	padding: .7rem 1.4rem;
+	border: 1px solid var(--border-gold, rgba(184, 150, 79, .28));
+	border-radius: 2px;
+	background: transparent;
+	color: var(--on-surface-variant, #b8b2a6);
+	font-family: var(--font-display, inherit);
+	font-size: .78rem;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: border-color var(--dur, .3s) ease, color var(--dur, .3s) ease;
+}
+
+.tempus-confirm__file:hover,
+.tempus-confirm__file:focus-within {
+	border-color: var(--gold-tempus, #b8964f);
+	color: var(--gold-tempus, #b8964f);
+	outline: none;
+}
+
+.tempus-confirm__input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.tempus-confirm__filename {
+	display: inline-block;
+	margin-left: .75rem;
+	font-size: .85rem;
+	color: var(--white, #f4f1ea);
+	word-break: break-all;
+}
+
+.tempus-confirm__submit {
+	display: block;
+	width: 100%;
+	margin: 1.25rem 0 0;
+	padding: .95rem 1.5rem;
+	border: 1px solid var(--gold-tempus, #b8964f);
+	border-radius: 2px;
+	background: var(--gold-tempus, #b8964f);
+	color: var(--near-black, #0e0d0b);
+	font-family: var(--font-display, inherit);
+	font-size: .82rem;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: background var(--dur, .3s) ease, color var(--dur, .3s) ease;
+}
+
+.tempus-confirm__submit:hover {
+	background: transparent;
+	color: var(--gold-tempus, #b8964f);
+}
+
+.tempus-confirm__submit:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--near-black, #0e0d0b), 0 0 0 4px var(--gold-tempus, #b8964f);
+}
+
+.tempus-confirm__status {
+	margin: .9rem 0 0;
+	min-height: 1.2em;
+	font-size: .85rem;
+	line-height: 1.55;
+}
+
+.tempus-confirm__status[data-state="ok"] {
+	color: var(--t-green, #6fa96b);
+}
+
+.tempus-confirm__status[data-state="error"] {
+	color: var(--error, #d0685f);
+}
+
+.tempus-confirm__status[data-state="busy"] {
+	color: var(--ink-faint, #8a857b);
+}
+
+
+/* -------------------------------------------------------------------------
+   5. Small screens
+
+   Most of these customers are on a phone, with the GCash app one tap away.
+   Everything tappable is full width and comfortably tall.
+   ---------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+	.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method > label {
+		padding: .9rem 1rem;
+		font-size: .85rem;
+	}
+
+	.woocommerce-checkout .payment_box {
+		padding: 0 1rem 1rem;
+	}
+
+	.tempus-pay-details strong {
+		display: block;
+		min-width: 0;
+	}
+
+	.tempus-pay-panel,
+	.tempus-confirm {
+		padding: 1.25rem;
+	}
+
+	.tempus-pay-qr {
+		max-width: none;
+	}
+
+	.tempus-pay-qr img {
+		margin: 0 auto;
+	}
+
+	.tempus-confirm__file {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.tempus-confirm__filename {
+		display: block;
+		margin: .6rem 0 0;
+		text-align: center;
+	}
+
+	.tempus-pay-panel__receipt li {
+		flex-direction: column;
+		gap: .15rem;
+	}
+
+	.tempus-pay-panel__receipt strong {
+		text-align: left;
+	}
+}
+
+
+/* Older browsers without :has() still get a usable, if less shiny, list. */
+@supports not selector(:has(*)) {
+
+	.woocommerce-checkout ul.wc_payment_methods li.wc_payment_method {
+		border-color: var(--border-gold, rgba(184, 150, 79, .28));
+	}
+}

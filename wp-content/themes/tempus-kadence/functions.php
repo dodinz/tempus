@@ -145,3 +145,13 @@ add_action( 'admin_notices', 'tempus_kadence_plugin_notice' );
  * Tempus — age verification gate.
  */
 require_once get_stylesheet_directory() . '/inc/age-gate.php';
+
+/**
+ * Tempus — manual payment methods (Bank Transfer / GCash / Maya).
+ */
+require_once get_stylesheet_directory() . '/inc/manual-payments.php';
+
+/**
+ * Tempus — checkout age confirmation (PID §4, §7, §11).
+ */
+require_once get_stylesheet_directory() . '/inc/age-confirm.php';

@@ -214,3 +214,11 @@ input:focus, textarea:focus, select:focus {
   height: 1px;
   width: 10px;
 }
+
+.woocommerce form .form-row label {
+  font-weight: normal;
+}
+
+select.orderby {
+  background-repeat: no-repeat;
+}
