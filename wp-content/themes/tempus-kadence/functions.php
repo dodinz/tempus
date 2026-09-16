@@ -63,6 +63,37 @@ function tempus_kadence_product_assets() {
 add_action( 'wp_enqueue_scripts', 'tempus_kadence_product_assets', 20 );
 
 /**
+ * Shop archive styling — the /shop category chooser and the designed empty
+ * state on product category/tag archives. Same token dependency as above.
+ */
+function tempus_kadence_shop_assets() {
+	if ( function_exists( 'is_shop' ) && ( is_shop() || is_product_taxonomy() ) ) {
+		wp_enqueue_style(
+			'tempus-shop-archive',
+			get_stylesheet_directory_uri() . '/assets/css/shop-archive.css',
+			array( 'tempus-tokens' ),
+			TEMPUS_KADENCE_VERSION
+		);
+	}
+}
+add_action( 'wp_enqueue_scripts', 'tempus_kadence_shop_assets', 20 );
+
+/**
+ * Hide Kadence's archive title on /shop — the category chooser prints its
+ * own H1 ("Choose Where to Begin"). Category archives keep Kadence's title.
+ *
+ * @param array $layout Kadence layout settings for the current request.
+ * @return array
+ */
+function tempus_kadence_shop_layout( $layout ) {
+	if ( function_exists( 'is_shop' ) && is_shop() && ! is_search() && function_exists( 'tempus_get_shop_categories' ) ) {
+		$layout['title'] = 'hide';
+	}
+	return $layout;
+}
+add_filter( 'kadence_post_layout', 'tempus_kadence_shop_layout' );
+
+/**
  * -----------------------------------------------------------------
  * Kadence Global Styles ← Tempus tokens
  * -----------------------------------------------------------------
