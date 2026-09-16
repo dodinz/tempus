@@ -171,6 +171,141 @@ add_action( 'trashed_post', 'tempus_flush_catalog_count' );
 add_action( 'untrashed_post', 'tempus_flush_catalog_count' );
 add_action( 'woocommerce_update_product', 'tempus_flush_catalog_count' );
 
+if ( ! function_exists( 'tempus_get_bottle_card_data' ) ) {
+	/**
+	 * Everything the shared bottle card needs beyond what WC_Product gives.
+	 *
+	 * Used by woocommerce/tempus/bottle-card.php in the child theme, which is
+	 * rendered by both the Featured Bottles block and every product loop — so
+	 * the homepage and the archives can't drift apart.
+	 *
+	 * @param WC_Product $product Product.
+	 * @return array{badge:string,category:string,meta:string} badge is HTML (tz-badge), the rest plain text.
+	 */
+	function tempus_get_bottle_card_data( WC_Product $product ) {
+		$id = $product->get_id();
+
+		// Category label: the deepest assigned category ("Japanese" rather than "Whisky").
+		$category = '';
+		$terms    = get_the_terms( $id, 'product_cat' );
+		if ( $terms && ! is_wp_error( $terms ) ) {
+			$default = (int) get_option( 'default_product_cat', 0 );
+			$terms   = array_filter( $terms, function ( $term ) use ( $default ) {
+				return (int) $term->term_id !== $default;
+			} );
+			usort( $terms, function ( $a, $b ) {
+				return count( get_ancestors( $b->term_id, 'product_cat' ) ) - count( get_ancestors( $a->term_id, 'product_cat' ) );
+			} );
+			if ( $terms ) {
+				$category = $terms[0]->name;
+			}
+		}
+
+		// Meta line: ACF bottle_meta, else Origin/Region · ABV, else the first
+		// two visible attributes (cigars and vinyl carry their own sets).
+		$meta = function_exists( 'get_field' ) ? trim( (string) get_field( 'bottle_meta', $id ) ) : '';
+		if ( '' === $meta ) {
+			$bits = array_filter( array(
+				$product->get_attribute( 'pa_origin' ) ?: $product->get_attribute( 'pa_region' ),
+				$product->get_attribute( 'pa_abv' ),
+			) );
+
+			if ( empty( $bits ) ) {
+				foreach ( $product->get_attributes() as $attribute ) {
+					if ( ! $attribute->get_visible() ) {
+						continue;
+					}
+					$value = $product->get_attribute( $attribute->get_name() );
+					if ( $value ) {
+						$bits[] = $value;
+					}
+					if ( count( $bits ) >= 2 ) {
+						break;
+					}
+				}
+			}
+
+			$meta = str_replace( ', ', ' · ', implode( ' · ', $bits ) );
+		}
+
+		return array(
+			'badge'    => tempus_product_badge( $product ),
+			'category' => $category,
+			'meta'     => $meta,
+		);
+	}
+}
+
+/**
+ * Loop button label: "Add to Cart" only when one click can actually add it.
+ * Loop buttons only — the single-product button uses a different filter.
+ */
+add_filter( 'woocommerce_product_add_to_cart_text', function ( $text, $product ) {
+	if ( $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock() ) {
+		return __( 'Add to Cart', 'tempus-core' );
+	}
+	return __( 'View', 'tempus-core' );
+}, 10, 2 );
+
+/**
+ * Give the loop add-to-cart link the Tempus card button classes. WooCommerce
+ * still builds the link itself, so stock checks and AJAX keep working.
+ */
+add_filter( 'woocommerce_loop_add_to_cart_args', function ( $args ) {
+	$args['class'] = trim( $args['class'] . ' tz-btn tz-btn--sm tz-card__cart' );
+	return $args;
+} );
+
+if ( ! function_exists( 'tempus_get_archive_chips' ) ) {
+	/**
+	 * Subcategory chips for a product category archive: "All" + the children
+	 * of the top category. On a child archive (/whisky/japanese/) it shows the
+	 * siblings, with the current one active.
+	 *
+	 * @return array[] Each item: label, url, active. Empty when there's nothing to filter by.
+	 */
+	function tempus_get_archive_chips() {
+		$term = get_queried_object();
+
+		if ( ! $term instanceof WP_Term || 'product_cat' !== $term->taxonomy ) {
+			return array();
+		}
+
+		$parent_id = $term->parent ? (int) $term->parent : (int) $term->term_id;
+
+		$children = get_terms( array(
+			'taxonomy'   => 'product_cat',
+			'parent'     => $parent_id,
+			'hide_empty' => true, // Never offer a chip that leads to an empty page.
+			'orderby'    => 'menu_order',
+		) );
+
+		if ( is_wp_error( $children ) || empty( $children ) ) {
+			return array();
+		}
+
+		$parent_url = get_term_link( $parent_id, 'product_cat' );
+		$chips      = array(
+			array(
+				'label'  => __( 'All', 'tempus-core' ),
+				'url'    => is_wp_error( $parent_url ) ? '' : $parent_url,
+				'active' => (int) $term->term_id === $parent_id,
+			),
+		);
+
+		foreach ( $children as $child ) {
+			$url     = get_term_link( $child );
+			$chips[] = array(
+				'label'  => $child->name,
+				'url'    => is_wp_error( $url ) ? '' : $url,
+				'active' => (int) $child->term_id === (int) $term->term_id,
+			);
+		}
+
+		return $chips;
+	}
+}
+
 /**
  * ---------------------------------------------------------------
  * AGE VERIFICATION HOOK POINT (compliance — required before launch)

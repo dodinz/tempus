@@ -17,7 +17,9 @@
  * BRANCHING
  * ---------
  * /shop           → Tempus category chooser (no product loop).
- * everything else → standard WooCommerce loop, unchanged.
+ * everything else → WooCommerce loop inside .tempus-archive; category/tag
+ *                   archives add the Tempus header + subcategory chips.
+ *                   Cards come from tempus/bottle-card.php via content-product.php.
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package Tempus_Kadence
@@ -50,14 +52,25 @@ if ( $tempus_show_chooser ) {
 
 } else {
 
+	echo '<div class="tempus-archive">';
+
 	/**
 	 * Hook: woocommerce_shop_loop_header.
 	 *
 	 * @hooked woocommerce_product_taxonomy_archive_header - 10
+	 *         (prints no title: Kadence filters woocommerce_show_page_title off)
 	 */
 	do_action( 'woocommerce_shop_loop_header' );
 
+	// Category/tag archives: Tempus header + subcategory chips. Kadence's own
+	// title is hidden for these in functions.php (tempus_kadence_shop_layout).
+	if ( is_product_taxonomy() && ! is_search() ) {
+		wc_get_template( 'tempus/archive-header.php' );
+	}
+
 	if ( woocommerce_product_loop() ) {
+
+		echo '<div class="tempus-archive__toolbar">';
 
 		/**
 		 * Hook: woocommerce_before_shop_loop.
@@ -67,6 +80,9 @@ if ( $tempus_show_chooser ) {
 		 */
 		do_action( 'woocommerce_before_shop_loop' );
 
+		echo '</div>';
+
+		// Each item → content-product.php → tempus/bottle-card.php (same card as the homepage).
 		woocommerce_product_loop_start();
 
 		if ( wc_get_loop_prop( 'total' ) ) {
@@ -98,6 +114,8 @@ if ( $tempus_show_chooser ) {
 		 */
 		do_action( 'woocommerce_no_products_found' );
 	}
+
+	echo '</div>';
 }
 
 /**

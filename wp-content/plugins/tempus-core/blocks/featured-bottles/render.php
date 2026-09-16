@@ -61,6 +61,14 @@ if ( ! empty( $block['align'] ) ) {
 }
 $anchor = ! empty( $block['anchor'] ) ? $block['anchor'] : 'shop';
 $reveal = 'tz-reveal' . ( ! empty( $is_preview ) ? ' is-visible' : '' );
+
+// The card markup is shared with every WooCommerce product grid and lives in
+// the child theme (woocommerce/tempus/bottle-card.php). Without it, show the
+// setup hint rather than an empty grid.
+$card_template = wc_locate_template( 'tempus/bottle-card.php' );
+if ( ! file_exists( $card_template ) ) {
+	$products = array();
+}
 ?>
 <section class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" id="<?php echo esc_attr( $anchor ); ?>">
 	<div class="tz-container">
@@ -72,44 +80,19 @@ $reveal = 'tz-reveal' . ( ! empty( $is_preview ) ? ' is-visible' : '' );
 
 		<?php if ( ! empty( $products ) ) : ?>
 			<div class="tz-grid-4">
-				<?php foreach ( $products as $product ) :
-					if ( ! $product ) { continue; }
-					$pid   = $product->get_id();
-					$badge = function_exists( 'tempus_product_badge' ) ? tempus_product_badge( $product ) : '';
-					$cats  = wc_get_product_category_list( $pid );
-					$link  = get_permalink( $pid );
-
-					// Meta line: bottle_meta ACF field, else pa_origin · pa_abv attributes.
-					$meta = function_exists( 'get_field' ) ? get_field( 'bottle_meta', $pid ) : '';
-					if ( empty( $meta ) ) {
-						$parts = array_filter( array(
-							$product->get_attribute( 'pa_origin' ),
-							$product->get_attribute( 'pa_abv' ),
-						) );
-						$meta = implode( ' · ', $parts );
-					}
-					?>
-					<div class="tz-card <?php echo esc_attr( $reveal ); ?>">
-						<a class="tz-card__media" href="<?php echo esc_url( $link ); ?>">
-							<?php if ( $badge ) : ?><div class="tz-card__badge"><?php echo wp_kses_post( $badge ); ?></div><?php endif; ?>
-							<?php echo $product->get_image('full'); ?>
-						</a>
-						<div class="tz-card__body">
-							<span class="tz-card__cat"><?php echo wp_kses_post( wp_strip_all_tags( $cats ) ); ?></span>
-							<h3 class="tz-card__name"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
-							<?php if ( $meta ) : ?><p class="tz-card__meta"><?php echo esc_html( $meta ); ?></p><?php endif; ?>
-							<div class="tz-card__foot">
-								<div class="tz-card__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
-								<div class="tz-card__actions">
-									<a class="tz-btn tz-btn--sm tz-card__cart" href="<?php echo esc_url( $product->add_to_cart_url() ); ?>">Add to Cart</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				<?php endforeach; ?>
+				<?php foreach ( $products as $bottle ) :
+					if ( ! $bottle ) { continue; }
+					wc_get_template( 'tempus/bottle-card.php', array( 'bottle' => $bottle, 'extra_class' => $reveal ) );
+				endforeach; ?>
 			</div>
 		<?php else : ?>
-			<p style="text-align:center;color:var(--ink-faint)">Add products and tag them &ldquo;Featured&rdquo; to populate this section.</p>
+			<p style="text-align:center;color:var(--ink-faint)">
+				<?php if ( ! file_exists( $card_template ) ) : ?>
+					The bottle card template is missing &mdash; activate the Tempus Kadence theme.
+				<?php else : ?>
+					Add products and tag them &ldquo;Featured&rdquo; to populate this section.
+				<?php endif; ?>
+			</p>
 		<?php endif; ?>
 	</div>
 </section>

@@ -98,18 +98,66 @@ em { font-style: italic; color: var(--gold-warm); }
 .tz-card__body { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .tz-card__cat { font-family: var(--font-ui); font-weight: 700; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-aged); }
 .tz-card__name { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1.15; color: var(--white); }
+.tz-card__name a { color: inherit; }
+.tz-card__name a:hover { color: var(--gold-tempus); }
 .tz-card__meta { margin: 0; font-size: 13px; color: var(--text-muted); }
 .tz-card__foot { display: flex; flex-direction: column; gap: 12px; margin-top: auto; padding-top: 16px; }
 .tz-card__price { font-family: var(--font-display); font-size: 22px; color: var(--gold-tempus); }
-.tz-card__actions { display: flex; }
-.tz-card__cart {
-  width: 100%;
-  text-align: center;
-  white-space: nowrap;
-  border: 1px solid var(--gold-tempus); color: var(--gold-tempus); background: transparent;
+.tz-card__price del { margin-right: 6px; font-size: .7em; color: var(--text-faint); }
+.tz-card__price ins { text-decoration: none; background: none; }
+.tz-card__actions { display: flex; flex-wrap: wrap; }
+
+/* The button is WooCommerce's own loop link (classes added in tempus-core), so it
+   also carries .button and picks up Kadence/Woo button styles. Every property is
+   declared here, under two selectors:
+     .tz-card a.tz-card__cart — homepage block; (0,2,1) ties the bridge's
+       `.woocommerce a.button` and main.css loading later wins.
+     .woocommerce ul.products li.product.tz-grid__item a.tz-card__cart — product
+       loops; (0,5,3) beats Kadence woocommerce.min.css
+       `.woocommerce ul.products:not(.woo-archive-btn-button) li:where(…) .button:not(.kb-button)`
+       (0,5,2), which strips background/border/padding and sets display:inline.
+   Keep both selectors on every rule so all cards stay identical. */
+.tz-card a.tz-card__cart,
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart,
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart.added {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 36px; margin: 0; padding: 0 20px; overflow: visible;
+  font-family: var(--font-ui); font-weight: 700; font-size: 12px; line-height: 1;
+  letter-spacing: .1em; text-transform: uppercase; text-align: center; white-space: nowrap;
+  border: 1px solid var(--gold-tempus); border-radius: var(--radius); box-shadow: none;
+  color: var(--gold-tempus); background: transparent;
   transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
 }
-.tz-card__cart:hover, .tz-card__cart:focus-visible { background: var(--gold-tempus); color: var(--near-black); }
+.tz-card a.tz-card__cart:hover,
+.tz-card a.tz-card__cart:focus-visible,
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart:hover,
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart:focus-visible {
+  background: var(--gold-tempus); color: var(--near-black);
+}
+.tz-card a.tz-card__cart.loading,
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart.loading { opacity: .6; }
+
+/* "View cart" link WooCommerce appends after an AJAX add */
+.tz-card .added_to_cart {
+  flex-basis: 100%; margin-top: 8px;
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; text-align: center;
+  color: var(--text-muted);
+}
+.tz-card .added_to_cart:hover { color: var(--gold-tempus); }
+
+/* Card inside a WooCommerce loop (archives, search, related, cross-sells).
+   Woo + Kadence style `ul.products li.product …` at up to (0,6,2); these
+   selectors out-rank them without !important. */
+.woocommerce ul.products li.product.tz-grid__item {
+  display: flex; float: none; width: auto; margin: 0; padding: 0;
+  background: none; border-radius: 0; box-shadow: none; overflow: visible;
+}
+.woocommerce ul.products li.product.tz-grid__item .tz-card { flex: 1; min-width: 0; }
+.woocommerce ul.products li.product.tz-grid__item .tz-card__media img { height: 100%; }
+.woocommerce ul.products li.product.tz-grid__item .tz-card__name { padding: 0; font-size: 22px; font-weight: 400; }
+.woocommerce ul.products li.product.tz-grid__item a.tz-card__cart .kadence-svg-iconset { display: none; }
+.woocommerce ul.products li.product.tz-grid__item a.added_to_cart { color: var(--text-muted); }
+.woocommerce ul.products li.product.tz-grid__item a.added_to_cart:hover { color: var(--gold-tempus); }
 
 /* Badges */
 .tz-badge { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius-sm); }

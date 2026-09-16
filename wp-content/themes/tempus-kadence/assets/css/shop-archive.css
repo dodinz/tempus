@@ -1,5 +1,6 @@
 /* =========================================================
-   TEMPUS — Shop archive (category chooser + empty state)
+   TEMPUS — Shop archive (category chooser, product archive
+   header/chips/grid/toolbar, empty state)
 
    Loaded on is_shop() || is_product_taxonomy() only — see
    tempus_kadence_shop_assets() in functions.php.
@@ -314,6 +315,143 @@
 }
 
 /* ---------------------------------------------------------
+   PRODUCT ARCHIVE (category / tag / search)
+   Header reuses .tempus-collection-header above; the cards
+   themselves are the shared .tz-card from main.css.
+   --------------------------------------------------------- */
+.tempus-archive {
+	margin-bottom: var(--section-gap);
+}
+
+.tempus-archive-header .tempus-collection-header__intro p {
+	margin: 0;
+}
+
+.tempus-archive-header .tempus-collection-header__intro p + p {
+	margin-top: var(--space-1);
+}
+
+/* Chips */
+.tempus-chips {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--space-1);
+	margin-top: var(--space-2);
+}
+
+.tempus-chip {
+	padding: 8px 16px;
+	border: var(--border-width) solid var(--border-gold);
+	border-radius: var(--radius-full);
+	font: var(--label-sm);
+	letter-spacing: var(--tracking-wide);
+	text-transform: uppercase;
+	text-decoration: none;
+	color: var(--on-surface-variant);
+	transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.tempus-chip:hover,
+.tempus-chip:focus-visible {
+	border-color: var(--gold-tempus);
+	color: var(--gold-tempus);
+}
+
+.tempus-chip.is-active {
+	border-color: var(--gold-tempus);
+	background: var(--gold-tempus);
+	color: var(--near-black);
+}
+
+/* Toolbar — notices full width, result count left, sorting right.
+   Kadence prints count + ordering inside .kadence-shop-top-row. */
+.tempus-archive__toolbar {
+	margin-bottom: var(--space-3);
+}
+
+.tempus-archive__toolbar .kadence-shop-top-row {
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	padding-bottom: var(--space-2);
+	border-bottom: var(--border-width) solid var(--outline-variant);
+}
+
+.tempus-archive__toolbar .woocommerce-result-count,
+.tempus-archive__toolbar .woocommerce-ordering {
+	float: none;
+	margin: 0;
+}
+
+.tempus-archive__toolbar .woocommerce-result-count {
+	font: var(--body-sm);
+	letter-spacing: var(--tracking-label-sm);
+	color: var(--on-surface-variant);
+}
+
+.tempus-archive__toolbar .woocommerce-ordering select {
+	padding: 8px 32px 8px 12px;
+	font: var(--body-sm);
+}
+
+/* Grid — 4 / 2 / 1, same gap and breakpoints as the homepage .tz-grid-4.
+   (0,3,1) beats Kadence's .grid-cols / .grid-lg-col-4 classes on ul.products. */
+.woocommerce .tempus-archive ul.products {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.woocommerce .tempus-archive ul.products::before,
+.woocommerce .tempus-archive ul.products::after {
+	content: none; /* WooCommerce's float clearfix would take a grid cell */
+}
+
+/* Pagination */
+.woocommerce .tempus-archive nav.woocommerce-pagination {
+	margin: var(--space-6) auto 0;
+}
+
+.woocommerce .tempus-archive nav.woocommerce-pagination ul li .page-numbers {
+	border: var(--border-width) solid var(--outline-variant);
+	border-radius: var(--radius-sm);
+	font: var(--label-bold);
+	color: var(--on-surface-variant);
+}
+
+.woocommerce .tempus-archive nav.woocommerce-pagination ul li a:hover,
+.woocommerce .tempus-archive nav.woocommerce-pagination ul li a:focus-visible {
+	border-color: var(--gold-tempus);
+	color: var(--gold-tempus);
+}
+
+.woocommerce .tempus-archive nav.woocommerce-pagination ul li span.current {
+	border-color: var(--gold-tempus);
+	background: var(--gold-tempus);
+	color: var(--near-black);
+}
+
+@media (max-width: 900px) {
+	.woocommerce .tempus-archive ul.products {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 640px) {
+	.woocommerce .tempus-archive ul.products {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.tempus-archive__toolbar .kadence-shop-top-row {
+		justify-content: center;
+	}
+}
+
+/* ---------------------------------------------------------
    RESPONSIVE — Kadence tablet breakpoint (max-width: 1024px)
    --------------------------------------------------------- */
 @media (max-width: 1024px) {
@@ -338,6 +476,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.tempus-chip,
 	.tempus-cat-card,
 	.tempus-cat-card__media img,
 	.tempus-cat-card__arrow {

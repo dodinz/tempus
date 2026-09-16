@@ -79,14 +79,19 @@ function tempus_kadence_shop_assets() {
 add_action( 'wp_enqueue_scripts', 'tempus_kadence_shop_assets', 20 );
 
 /**
- * Hide Kadence's archive title on /shop — the category chooser prints its
- * own H1 ("Choose Where to Begin"). Category archives keep Kadence's title.
+ * Hide Kadence's archive title where Tempus prints its own H1:
+ *   /shop                    → "Choose Where to Begin" (tempus/collection-header.php)
+ *   product category/tag     → term title + chips (tempus/archive-header.php)
+ * Search results keep Kadence's title.
  *
  * @param array $layout Kadence layout settings for the current request.
  * @return array
  */
 function tempus_kadence_shop_layout( $layout ) {
-	if ( function_exists( 'is_shop' ) && is_shop() && ! is_search() && function_exists( 'tempus_get_shop_categories' ) ) {
+	if ( ! function_exists( 'is_shop' ) || is_search() ) {
+		return $layout;
+	}
+	if ( ( is_shop() && function_exists( 'tempus_get_shop_categories' ) ) || is_product_taxonomy() ) {
 		$layout['title'] = 'hide';
 	}
 	return $layout;
